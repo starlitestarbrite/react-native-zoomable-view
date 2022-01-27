@@ -1,18 +1,34 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, Image, Animated, Button } from 'react-native';
-import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  // Animated,
+  Button,
+} from 'react-native';
+import { NewReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
 
 export default function App() {
-  const zoomAnimatedValue = React.useRef(new Animated.Value(1)).current;
-  const scale = Animated.divide(1, zoomAnimatedValue);
+  // const zoomAnimatedValue = React.useRef(new Animated.Value(1)).current;
+  // const scale = Animated.divide(1, zoomAnimatedValue);
   const [showMarkers, setShowMarkers] = React.useState(true);
 
   return (
     <View style={styles.container}>
       <Text>ReactNativeZoomableView</Text>
       <View style={styles.box}>
-        <ReactNativeZoomableView
+        <NewReactNativeZoomableView>
+          <View>
+            <Image
+              style={styles.img}
+              source={{ uri: 'https://placekitten.com/400/200' }}
+            />
+          </View>
+        </NewReactNativeZoomableView>
+
+        {/* <ReactNativeZoomableView
           maxZoom={30}
           initialZoom={1.5}
           // Give these to the zoomable view so it can apply the boundaries around the actual content.
@@ -47,7 +63,7 @@ export default function App() {
                 ))
               )}
           </View>
-        </ReactNativeZoomableView>
+        </ReactNativeZoomableView> */}
       </View>
       <Button
         title={`${showMarkers ? 'Hide' : 'Show'} markers`}

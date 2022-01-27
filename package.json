@@ -61,7 +61,10 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "prop-types": "^15.7.2"
+    "prop-types": "^15.7.2",
+    "react-native-anchor-point": "^1.0.6",
+    "react-native-gesture-handler": "^2.2.0",
+    "react-native-reanimated": "^2.3.1"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^11.0.0",

@@ -12,13 +12,11 @@ export default function App() {
     <View style={styles.container}>
       <Text>ReactNativeZoomableView</Text>
       <View style={styles.box}>
-        <NewReactNativeZoomableView width={400} height={400}>
-          <View>
-            <Image
-              style={styles.img}
-              source={{ uri: 'https://placekitten.com/400/400' }}
-            />
-          </View>
+        <NewReactNativeZoomableView contentWidth={400} contentHeight={400}>
+          <Image
+            style={styles.img}
+            source={{ uri: 'https://placekitten.com/400/400' }}
+          />
         </NewReactNativeZoomableView>
 
         {/* <ReactNativeZoomableView
@@ -74,7 +72,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   contents: { flex: 1, alignSelf: 'stretch' },
-  box: { borderWidth: 5, flexShrink: 1, height: 500, width: 310 },
+  box: { borderWidth: 5, height: 500, width: 310 },
   img: { width: '100%', height: '100%', resizeMode: 'contain' },
   marker: {
     position: 'absolute',

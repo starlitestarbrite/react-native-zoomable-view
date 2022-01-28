@@ -58,13 +58,16 @@ export const NewerReactNativeZoomableView = ({ children }) => {
         ctx.prevTranslateOriginY = ctx.translateOriginY;
       }
 
-      ctx.translateOriginX =
-        ctx.prevTranslateOriginX + e.focalX - ctx.offsetFromFocalX;
-      ctx.translateOriginY =
-        ctx.prevTranslateOriginY + e.focalY - ctx.offsetFromFocalY;
-
-      translation.x.value = ctx.translateOriginX - origin.x.value;
-      translation.y.value = ctx.translateOriginY - origin.y.value;
+      translation.x.value =
+        ctx.prevTranslateOriginX +
+        e.focalX -
+        ctx.offsetFromFocalX -
+        origin.x.value;
+      translation.y.value =
+        ctx.prevTranslateOriginY +
+        e.focalY -
+        ctx.offsetFromFocalY -
+        origin.y.value;
 
       ctx.prevPointers = e.numberOfPointers;
     },

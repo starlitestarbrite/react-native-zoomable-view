@@ -15,23 +15,24 @@ export const NewReactNativeZoomableView = ({
   // where this pinch started
   const pinchOrigin = { x: useSharedValue(0), y: useSharedValue(0) };
   // the translation we had at the start of this pinch
-  const pinchOriginTranslation = { x: useSharedValue(0), y: useSharedValue(0) };
+  // const pinchOriginTranslation = { x: useSharedValue(0), y: useSharedValue(0) };
   const pinchTranslation = { x: useSharedValue(0), y: useSharedValue(0) };
+
+  const currentPinchFocus = { x: useSharedValue(0), y: useSharedValue(0) };
 
   const offsetX = useSharedValue(0);
   const offsetY = useSharedValue(0);
   const startX = useSharedValue(0);
   const startY = useSharedValue(0);
   const scale = useSharedValue(1);
+
+  const savedPinchTranslation = { x: useSharedValue(0), y: useSharedValue(0) };
   const savedScale = useSharedValue(1);
 
   const dragGesture = Gesture.Pan()
     .averageTouches(true)
     .maxPointers(1)
-    .onBegin(() => {
-      // startX.value = e.x;
-      // startY.value = e.y;
-    })
+    .onBegin(() => {})
     .onUpdate((e) => {
       'worklet';
       offsetX.value = e.translationX + startX.value;
@@ -39,14 +40,6 @@ export const NewReactNativeZoomableView = ({
     })
     .onEnd(() => {
       'worklet';
-      // offsetX.value = withSpring(0, {
-      //   stiffness: 60,
-      //   overshootClamping: true,
-      // });
-      // offsetY.value = withSpring(0, {
-      //   stiffness: 60,
-      //   overshootClamping: true,
-      // });
       startX.value = offsetX.value;
       startY.value = offsetY.value;
     });
@@ -55,21 +48,19 @@ export const NewReactNativeZoomableView = ({
     .onBegin((event) => {
       pinchOrigin.x.value = event.focalX;
       pinchOrigin.y.value = event.focalY;
-
-      // Save the pinchTranslation from the start of the pinch
-      pinchOriginTranslation.x.value = pinchTranslation.x.value;
-      pinchOriginTranslation.y.value = pinchTranslation.y.value;
     })
     .onUpdate((event) => {
       'worklet';
 
-      // Pinch translation is the gesture start translation plus the current translation
-      const pinchMoveX = event.focalX - pinchOrigin.x.value;
-      const pinchMoveY = event.focalY - pinchOrigin.y.value;
+      currentPinchFocus.x.value = event.focalX;
+      currentPinchFocus.y.value = event.focalY;
 
+      // // Pinch translatiopinchOriginTranslation.x.value is the gesture start translation plus the current translation
+      // const pinchMoveX = event.focalX - pinchOrigin.x.value;
+      // const pinchMoveY = event.focalY - pinchOrigin.y.value;
       // Add this translation to the original pinch translation
-      pinchTranslation.x.value = pinchMoveX + pinchOriginTranslation.x.value;
-      pinchTranslation.y.value = pinchMoveY + pinchOriginTranslation.y.value;
+      // pinchTranslation.x.value = savedPinchTranslation.x.value + pinchMoveX;
+      // pinchTranslation.y.value = savedPinchTranslation.y.value + pinchMoveY;
 
       // Multiply the scale
       scale.value = savedScale.value * event.scale;
@@ -77,21 +68,18 @@ export const NewReactNativeZoomableView = ({
     .onEnd(() => {
       'worklet';
       savedScale.value = scale.value;
-      pinchOriginTranslation.x.value = pinchTranslation.x.value;
-      pinchOriginTranslation.y.value = pinchTranslation.y.value;
-
-      // scale.value = withSpring(event.scale, {
-      //   stiffness: 100,
-      //   overshootClamping: true,
-      // });
+      savedPinchTranslation.x.value = pinchTranslation.x.value;
+      savedPinchTranslation.y.value = pinchTranslation.y.value;
     });
 
   const [layout, setLayout] = useState({ height: 10, width: 10 });
 
   const animatedStyles = useAnimatedStyle(() => {
     const { width, height } = layout;
-    const pinchX = pinchOrigin.x.value / width;
-    const pinchY = pinchOrigin.y.value / height;
+    const pinchX = pinchTranslation.x.value / width;
+    const pinchY = pinchTranslation.y.value / height;
+
+    const offsetX = width - (width * scale.value) / 2;
 
     return {
       width: '100%',
@@ -100,17 +88,21 @@ export const NewReactNativeZoomableView = ({
         // pinch
         { translateX: width * (pinchX - 0.5) },
         { translateY: width * (pinchY - 0.5) },
+
         { scale: scale.value },
-        { translateX: width * (0.5 - pinchX) },
+        { translateX: offsetX },
+        { translateY: pinchY * height },
+
         { translateY: width * (0.5 - pinchY) },
+        { translateX: width * (0.5 - pinchX) },
 
-        // pinch tranlsation
-        { translateX: pinchTranslation.x.value / scale.value },
-        { translateY: pinchTranslation.y.value / scale.value },
+        // // pinch tranlsation
+        // { translateX: pinchTranslation.x.value / scale.value },
+        // { translateY: pinchTranslation.y.value / scale.value },
 
-        // drag
-        { translateX: offsetX.value / scale.value },
-        { translateY: offsetY.value / scale.value },
+        // // drag
+        // { translateX: offsetX.value / scale.value },
+        // { translateY: offsetY.value / scale.value },
       ],
     };
   }, [pinchOrigin, pinchTranslation, layout]);

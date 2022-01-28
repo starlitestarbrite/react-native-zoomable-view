@@ -33,6 +33,8 @@ export const NewReactNativeZoomableView = ({ children }) => {
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
 
+  const [layout, setLayout] = useState({ height: 10, width: 10 });
+
   const zoomGesture = Gesture.Pinch()
     .onBegin((event) => {
       'worklet';
@@ -61,8 +63,6 @@ export const NewReactNativeZoomableView = ({ children }) => {
       startPinchTranslate.x.value = pinchTranslation.x.value;
       startPinchTranslate.y.value = pinchTranslation.y.value;
     });
-
-  const [layout, setLayout] = useState({ height: 10, width: 10 });
 
   const animatedStyles = useAnimatedStyle(() => {
     const { width, height } = layout;

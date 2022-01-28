@@ -56,10 +56,10 @@ export default function App() {
           </View>
         </ReactNativeZoomableView> */}
       </View>
-      <Button
+      {/* <Button
         title={`${showMarkers ? 'Hide' : 'Show'} markers`}
         onPress={() => setShowMarkers((value) => !value)}
-      />
+      /> */}
     </View>
   );
 }

@@ -1,21 +1,21 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  // withSpring,
 } from 'react-native-reanimated';
 
 export const NewReactNativeZoomableView = ({
   children,
-}: // width,
-// height,
-{
+}: {
   children: React.ReactNode;
-  // width: number;
-  // height: number;
 }) => {
+  // where this pinch started
   const pinchOrigin = { x: useSharedValue(0), y: useSharedValue(0) };
+  // the translation we had at the start of this pinch
+  const pinchOriginTranslation = { x: useSharedValue(0), y: useSharedValue(0) };
   const pinchTranslation = { x: useSharedValue(0), y: useSharedValue(0) };
 
   const offsetX = useSharedValue(0);
@@ -25,14 +25,9 @@ export const NewReactNativeZoomableView = ({
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
 
-  // console.log({ width, height });
-
-  // const rotation = useSharedValue(0);
-  // const savedRotation = useSharedValue(0);
-
   const dragGesture = Gesture.Pan()
     .averageTouches(true)
-    // .maxPointers(1)
+    .maxPointers(1)
     .onBegin(() => {
       // startX.value = e.x;
       // startY.value = e.y;
@@ -60,16 +55,30 @@ export const NewReactNativeZoomableView = ({
     .onBegin((event) => {
       pinchOrigin.x.value = event.focalX;
       pinchOrigin.y.value = event.focalY;
+
+      // Save the pinchTranslation from the start of the pinch
+      pinchOriginTranslation.x.value = pinchTranslation.x.value;
+      pinchOriginTranslation.y.value = pinchTranslation.y.value;
     })
     .onUpdate((event) => {
       'worklet';
-      pinchTranslation.x.value = event.focalX - pinchOrigin.x.value;
-      pinchTranslation.y.value = event.focalY - pinchOrigin.y.value;
+
+      // Pinch translation is the gesture start translation plus the current translation
+      const pinchMoveX = event.focalX - pinchOrigin.x.value;
+      const pinchMoveY = event.focalY - pinchOrigin.y.value;
+
+      // Add this translation to the original pinch translation
+      pinchTranslation.x.value = pinchMoveX + pinchOriginTranslation.x.value;
+      pinchTranslation.y.value = pinchMoveY + pinchOriginTranslation.y.value;
+
+      // Multiply the scale
       scale.value = savedScale.value * event.scale;
     })
     .onEnd(() => {
       'worklet';
       savedScale.value = scale.value;
+      pinchOriginTranslation.x.value = pinchTranslation.x.value;
+      pinchOriginTranslation.y.value = pinchTranslation.y.value;
 
       // scale.value = withSpring(event.scale, {
       //   stiffness: 100,
@@ -77,20 +86,43 @@ export const NewReactNativeZoomableView = ({
       // });
     });
 
+  const [layout, setLayout] = useState({ height: 10, width: 10 });
+
   const animatedStyles = useAnimatedStyle(() => {
-    let translateX = offsetX.value + pinchTranslation.x.value;
-    let translateY = offsetY.value + pinchTranslation.y.value;
+    const { width, height } = layout;
+    const pinchX = pinchOrigin.x.value / width;
+    const pinchY = pinchOrigin.y.value / height;
 
     return {
       width: '100%',
       height: '100%',
-      transform: [{ translateX }, { translateY }, { scale: scale.value }],
+      transform: [
+        // pinch
+        { translateX: width * (pinchX - 0.5) },
+        { translateY: width * (pinchY - 0.5) },
+        { scale: scale.value },
+        { translateX: width * (0.5 - pinchX) },
+        { translateY: width * (0.5 - pinchY) },
+
+        // pinch tranlsation
+        { translateX: pinchTranslation.x.value / scale.value },
+        { translateY: pinchTranslation.y.value / scale.value },
+
+        // drag
+        { translateX: offsetX.value / scale.value },
+        { translateY: offsetY.value / scale.value },
+      ],
     };
-  }, [pinchOrigin, pinchTranslation]);
+  }, [pinchOrigin, pinchTranslation, layout]);
 
   return (
     <GestureDetector gesture={Gesture.Simultaneous(zoomGesture, dragGesture)}>
-      <Animated.View style={styles.contentWrapper}>
+      <Animated.View
+        style={styles.contentWrapper}
+        onLayout={(e) => {
+          setLayout(e.nativeEvent.layout);
+        }}
+      >
         <Animated.View style={animatedStyles}>{children}</Animated.View>
       </Animated.View>
     </GestureDetector>
@@ -101,6 +133,5 @@ const styles = StyleSheet.create({
   contentWrapper: {
     width: '100%',
     height: '100%',
-    // backgroundColor: 'green',
   },
 });

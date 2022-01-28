@@ -1,13 +1,6 @@
 import * as React from 'react';
 
-import {
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  // Animated,
-  Button,
-} from 'react-native';
+import { StyleSheet, View, Text, Image, Animated, Button } from 'react-native';
 import { NewReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
 
 export default function App() {
@@ -19,7 +12,7 @@ export default function App() {
     <View style={styles.container}>
       <Text>ReactNativeZoomableView</Text>
       <View style={styles.box}>
-        <NewReactNativeZoomableView>
+        <NewReactNativeZoomableView width={400} height={200}>
           <View>
             <Image
               style={styles.img}

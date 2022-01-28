@@ -31,101 +31,67 @@ export const NewReactNativeZoomableView = ({
 
   const pinchStart = { x: useSharedValue(0), y: useSharedValue(0) };
   const pinchPosition = { x: useSharedValue(0), y: useSharedValue(0) };
-
+  const pinchTransform = { x: useSharedValue(0), y: useSharedValue(0) };
   const scale = useSharedValue(1);
-  const savedScale = useSharedValue(1);
 
-  // TODO: Save previous transform
-  // const savedPinchTranslate = { x: useSharedValue(0), y: useSharedValue(0) };
-  const translateOrigin = { x: useSharedValue(0), y: useSharedValue(0) };
-  const previousTranslateOrigin = {
-    x: useSharedValue(0),
-    y: useSharedValue(0),
-  };
-  const offsetFromFocal = { x: useSharedValue(0), y: useSharedValue(0) };
-  const translation = { x: useSharedValue(0), y: useSharedValue(0) };
-  const origin = { x: useSharedValue(0), y: useSharedValue(0) };
+  const savedScale = useSharedValue(1);
+  const savedPinchTransform = { x: useSharedValue(0), y: useSharedValue(0) };
 
   const zoomGesture = Gesture.Pinch()
-    .onBegin((e) => {
+    .onBegin((event) => {
       'worklet';
 
       // Get the point where we started pinching
-      // pinchStart.x.value = event.focalX;
-      // pinchStart.y.value = event.focalY;
+      pinchStart.x.value = event.focalX;
+      pinchStart.y.value = event.focalY;
 
-      // TODO: add previous transform
-      // pinchStart.x.value +=
-      // pinchStart.y.value +=
-
-      origin.x.value = e.focalX;
-      origin.y.value = e.focalY;
-
-      offsetFromFocal.x.value = origin.x.value;
-      offsetFromFocal.y.value = origin.y.value;
-      previousTranslateOrigin.x.value = origin.x.value;
-      previousTranslateOrigin.y.value = origin.y.value;
+      // TODO: add previous transform here
     })
-    .onUpdate((e) => {
+    .onUpdate((event) => {
       'worklet';
 
-      pinchPosition.x.value = e.focalX - pinchStart.x.value;
-      pinchPosition.y.value = e.focalY - pinchStart.y.value;
+      pinchPosition.x.value = event.focalX;
+      pinchPosition.y.value = event.focalY;
 
-      translateOrigin.x.value =
-        previousTranslateOrigin.x.value + e.focalX - offsetFromFocal.x.value;
-      translateOrigin.y.value =
-        previousTranslateOrigin.y.value + e.focalY - offsetFromFocal.y.value;
+      pinchTransform.x.value = event.focalX - pinchStart.x.value;
+      pinchTransform.y.value = event.focalY - pinchStart.y.value;
 
-      translation.x.value = translateOrigin.x.value - origin.x.value;
-      translation.y.value = translateOrigin.y.value - origin.y.value;
-
-      scale.value = savedScale.value * e.scale;
+      scale.value = savedScale.value * event.scale;
     })
     .onEnd(() => {
       'worklet';
 
-      // savedScale.value = scale.value;
-
-      // TODO: Save previous transform
-      // savedPinchTranslate.x.value =
-      // savedPinchTranslate.y.value =
+      savedScale.value = scale.value;
+      // Save previous transform
+      // TODO: add it to start of next transform
+      savedPinchTransform.x.value = pinchTransform.x.value;
+      savedPinchTransform.y.value = pinchTransform.y.value;
     });
 
   const animatedStyles = useAnimatedStyle(() => {
-    // const { width, height } = layout;
-    // const pinchX = pinchStart.x.value / width;
-    // const pinchY = pinchStart.y.value / height;
-
-    const left = -layout.width / 2;
-    const top = -layout.height / 2;
-    const xTransform = left + pinchPosition.x.value;
-    const yTransform = top + pinchPosition.y.value;
+    const { width, height } = layout;
+    const pinchX = pinchStart.x.value / width;
+    const pinchY = pinchStart.y.value / height;
 
     return {
       transform: [
-        { translateX: translation.x.value },
-        {
-          translateY: translation.y.value,
-        },
+        { translateX: dragOffset.x.value / scale.value },
+        { translateY: dragOffset.y.value / scale.value },
 
-        // { translateX: pinchPosition.x.value },
-        // { translateY: pinchPosition.y.value },
-        // { translateX: dragOffset.x.value },
-        // { translateY: dragOffset.y.value },
-
-        // // Reset the transform before translating and scaling
-        { translateX: xTransform },
-        { translateY: yTransform },
+        // Reset the transform before translating and scaling
+        { translateX: width * (pinchX - 0.5) },
+        { translateY: height * (pinchY - 0.5) },
 
         { scale: scale.value },
+        { translateX: pinchTransform.x.value / scale.value },
+        { translateY: pinchTransform.y.value / scale.value },
 
-        // // Reapply the trasnform after translating and scaling
-        { translateX: -xTransform },
-        { translateY: -yTransform },
+        // Reapply the trasnform after translating and scaling
+        { translateY: height * (0.5 - pinchY) },
+        { translateX: width * (0.5 - pinchX) },
       ],
     };
-  }, [pinchStart, pinchPosition, layout]);
+  }, [pinchStart, pinchTransform, layout]);
 
   return (
     <GestureDetector gesture={Gesture.Simultaneous(zoomGesture, dragGesture)}>

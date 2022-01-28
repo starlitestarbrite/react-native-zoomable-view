@@ -12,11 +12,11 @@ export default function App() {
     <View style={styles.container}>
       <Text>ReactNativeZoomableView</Text>
       <View style={styles.box}>
-        <NewReactNativeZoomableView width={400} height={200}>
+        <NewReactNativeZoomableView width={400} height={400}>
           <View>
             <Image
               style={styles.img}
-              source={{ uri: 'https://placekitten.com/400/200' }}
+              source={{ uri: 'https://placekitten.com/400/400' }}
             />
           </View>
         </NewReactNativeZoomableView>

@@ -9,6 +9,13 @@ import { pinchDragTranslate } from './helper/pinchDragTranslate';
 import { clamp } from './helper/clamp';
 import { ReactNativeZoomableViewProps } from './typings';
 
+// A new implementaiton of ReactNativeZoomableView
+// using react-native-gesture-handler and react-native-reanimated
+// for better performance and much shorter code.
+
+// TODO:
+// - One-finger drag handler needs to be added to the animated value calculation
+
 export const ReactNativeZoomableView = ({
   children,
   scaleValue,
@@ -89,24 +96,30 @@ export const ReactNativeZoomableView = ({
     let lastScale = clamp(last.scale.value, minZoom, maxZoom);
     let scale = clamp(last.scale.value * eventScale.value, minZoom, maxZoom);
 
-    // Zoom offset
-    const { x, y } = pinchTranslate(last, scale, pinchStart, layout);
+    // Scale offset
+    const { x: pinchOffsetTranslateX, y: pinchOffsetTranslateY } =
+      pinchTranslate(last, scale, pinchStart, layout);
 
-    // Pinch drag offset comes after the scale
-    const { x: dragX, y: dragY } = pinchDragTranslate(
+    // Pinch drag offset comes after the scale offset
+    const { x: pinchPanX, y: pinchPanY } = pinchDragTranslate(
       lastPinchDrag,
       pinchDrag,
       lastScale,
       eventScale
+
+      // TODO: we need to factor the single-finger drag translate
+      // into this calculation somehow.
+      // lastDragOffset,
+      // dragOffset,
     );
 
     return {
       transform: [
-        { translateX: x },
-        { translateY: y },
+        { translateX: pinchOffsetTranslateX },
+        { translateY: pinchOffsetTranslateY },
         { scale },
-        { translateX: dragX },
-        { translateY: dragY },
+        { translateX: pinchPanX },
+        { translateY: pinchPanY },
       ],
     };
   });

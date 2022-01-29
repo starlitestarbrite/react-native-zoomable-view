@@ -15,8 +15,8 @@ export default function App() {
       <View style={styles.box}>
         <ReactNativeZoomableView
           initialZoom={1}
-          minZoom={0.5}
-          maxZoom={1.5}
+          minZoom={0.1}
+          maxZoom={15}
           scaleValue={scale}
         >
           <View style={styles.contents}>

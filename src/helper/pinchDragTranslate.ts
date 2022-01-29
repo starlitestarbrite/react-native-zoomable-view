@@ -1,11 +1,14 @@
 import { SharedValue } from 'react-native-reanimated';
 
-// This calculates the pinch gesture's drag offset
+// This calculates the drag offset from the pinch (todo: and pan) gestures
 export const pinchDragTranslate = (
   lastPinchDrag: { x: SharedValue<number>; y: SharedValue<number> },
   pinchDrag: { x: SharedValue<number>; y: SharedValue<number> },
   lastScale: number,
   eventScale: SharedValue<number>
+  // TODO: Implement
+  // lastDrag: { x: SharedValue<number>; y: SharedValue<number> },
+  // drag: { x: SharedValue<number>; y: SharedValue<number> },
 ) => {
   'worklet';
 

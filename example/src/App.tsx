@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text, Image, Button } from 'react-native';
-import { NewReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
+import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
 import { useSharedValue } from 'react-native-reanimated';
 import { Markers } from './Markers';
 
@@ -13,9 +13,10 @@ export default function App() {
     <View style={styles.container}>
       <Text>ReactNativeZoomableView</Text>
       <View style={styles.box}>
-        <NewReactNativeZoomableView
-          // TODO: maxZoom
-          // TODO: initialZoom
+        <ReactNativeZoomableView
+          initialZoom={1}
+          minZoom={0.5}
+          maxZoom={1.5}
           scaleValue={scale}
         >
           <View style={styles.contents}>
@@ -25,7 +26,7 @@ export default function App() {
             />
             {showMarkers && <Markers scale={scale} />}
           </View>
-        </NewReactNativeZoomableView>
+        </ReactNativeZoomableView>
       </View>
       <Button
         title={`${showMarkers ? 'Hide' : 'Show'} markers`}

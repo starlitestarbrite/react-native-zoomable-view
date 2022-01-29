@@ -1,12 +1,4 @@
-import ReactNativeZoomableView from './ReactNativeZoomableView';
-import ReactNativeZoomableViewWithGestures from './ReactNativeZoomableViewWithGestures';
-import { ReactNativeZoomableViewProps, ZoomableViewEvent } from './typings';
-import { NewReactNativeZoomableView } from './NewReactNativeZoomableView';
+import { ReactNativeZoomableViewProps } from './typings';
+import { ReactNativeZoomableView } from './ReactNativeZoomableView';
 
-export {
-  ReactNativeZoomableView,
-  ReactNativeZoomableViewWithGestures,
-  ReactNativeZoomableViewProps,
-  ZoomableViewEvent,
-  NewReactNativeZoomableView,
-};
+export { ReactNativeZoomableViewProps, ReactNativeZoomableView };

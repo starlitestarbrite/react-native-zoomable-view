@@ -13,7 +13,7 @@ export const Markers = ({ scale }: { scale: SharedValue<number> }) => (
   <>
     {[20, 40, 60, 80].map((left) =>
       [20, 40, 60, 80].map((top) => (
-        <Marker left={left} top={top} scale={scale} />
+        <Marker key={`${left}x${top}`} left={left} top={top} scale={scale} />
       ))
     )}
   </>
@@ -24,11 +24,7 @@ const Marker = ({ left, top, scale }) => {
     transform: [{ scale: 1 / scale.value }],
   }));
   const position = { left: `${left}%`, top: `${top}%` };
-  const key = `${left}x${top}`;
-
-  return (
-    <Animated.View key={key} style={[styles.marker, position, animatedStyle]} />
-  );
+  return <Animated.View style={[styles.marker, position, animatedStyle]} />;
 };
 
 const styles = StyleSheet.create({

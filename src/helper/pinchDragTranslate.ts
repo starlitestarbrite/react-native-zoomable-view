@@ -6,9 +6,6 @@ export const pinchDragTranslate = (
   pinchDrag: { x: SharedValue<number>; y: SharedValue<number> },
   lastScale: number,
   eventScale: SharedValue<number>
-  // TODO: Implement
-  // lastDrag: { x: SharedValue<number>; y: SharedValue<number> },
-  // drag: { x: SharedValue<number>; y: SharedValue<number> },
 ) => {
   'worklet';
 

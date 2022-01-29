@@ -14,7 +14,7 @@ import { ReactNativeZoomableViewProps } from './typings';
 // for better performance and much shorter code.
 
 // TODO:
-// - One-finger drag handler needs to be added to the animated value calculation
+// - Lifting one finger from a pinch gesture does not pan just yet.
 
 export const ReactNativeZoomableView = ({
   children,
@@ -49,12 +49,21 @@ export const ReactNativeZoomableView = ({
     })
     .onUpdate((event) => {
       'worklet';
-      eventScale.value = clamp(event.scale, minZoom, maxZoom);
-      // Max/min values
-      let scale = clamp(last.scale.value * eventScale.value, minZoom, maxZoom);
-      updateProps({ scale });
-      pinchDrag.x.value = event.focalX - pinchStart.x.value;
-      pinchDrag.y.value = event.focalY - pinchStart.y.value;
+
+      // TODO: Handle lifting one finger from the pinch and continuing to drag
+      // by using an offset value from `focalX` when `event.numberOfPointers` becomes 1.
+      if (event.numberOfPointers === 2) {
+        pinchDrag.x.value = event.focalX - pinchStart.x.value;
+        pinchDrag.y.value = event.focalY - pinchStart.y.value;
+        eventScale.value = clamp(event.scale, minZoom, maxZoom);
+        // Max/min values
+        let scale = clamp(
+          last.scale.value * eventScale.value,
+          minZoom,
+          maxZoom
+        );
+        updateProps({ scale });
+      }
     })
     .onEnd(() => {
       'worklet';
@@ -78,11 +87,12 @@ export const ReactNativeZoomableView = ({
     .enabled(zoomEnabled)
     .averageTouches(true)
     .maxPointers(1)
-    .onBegin(() => {})
     .onUpdate((e) => {
       'worklet';
-      dragOffset.x.value = e.translationX + dragStart.x.value;
-      dragOffset.y.value = e.translationY + dragStart.y.value;
+      dragOffset.x.value =
+        dragStart.x.value + e.translationX / scaleValue.value;
+      dragOffset.y.value =
+        dragStart.y.value + e.translationY / scaleValue.value;
     })
     .onEnd(() => {
       'worklet';
@@ -106,11 +116,6 @@ export const ReactNativeZoomableView = ({
       pinchDrag,
       lastScale,
       eventScale
-
-      // TODO: we need to factor the single-finger drag translate
-      // into this calculation somehow.
-      // lastDragOffset,
-      // dragOffset,
     );
 
     return {
@@ -120,6 +125,8 @@ export const ReactNativeZoomableView = ({
         { scale },
         { translateX: pinchPanX },
         { translateY: pinchPanY },
+        { translateX: dragOffset.x.value },
+        { translateY: dragOffset.y.value },
       ],
     };
   });

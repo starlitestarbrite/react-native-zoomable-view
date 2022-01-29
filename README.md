@@ -9,7 +9,7 @@ This is the v3 rewrite of this package, with `react-native-reanimated` and `reac
 
 ## Still to do
 
-- Implement one-finger drag gesture
+- Lifting one finger from a pinch gesture should pan
 
 ## Preview
 

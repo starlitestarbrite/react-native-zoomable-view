@@ -9,13 +9,16 @@ import Animated, {
 export const NewReactNativeZoomableView = ({ children }) => {
   const [layout, setLayout] = useState({ height: 0, width: 0 });
 
-  const pinchStart = { x: useSharedValue(0) };
+  const pinchStart = {
+    x: useSharedValue(0),
+    y: useSharedValue(0),
+  };
   const eventScale = useSharedValue(1);
 
   const last = {
     x: useSharedValue(0),
+    y: useSharedValue(0),
     scale: useSharedValue(1),
-    width: useSharedValue(300),
   };
 
   const zoomGesture = Gesture.Pinch()
@@ -23,6 +26,7 @@ export const NewReactNativeZoomableView = ({ children }) => {
       'worklet';
       // Get the point where we started pinching
       pinchStart.x.value = event.focalX;
+      pinchStart.y.value = event.focalY;
     })
     .onUpdate((event) => {
       'worklet';
@@ -32,20 +36,21 @@ export const NewReactNativeZoomableView = ({ children }) => {
       'worklet';
       const lastScale = last.scale.value;
       const newScale = lastScale * eventScale.value;
-
-      const lastWidth = last.width.value;
-      const newWidth = layout.width * newScale;
-
-      const origWidth = layout.width;
-      const lastX = last.x.value;
-      const pinchX = pinchStart.x.value;
-      const pinchRelX = pinchX - lastX - origWidth / 2;
-      const pinchRatio = pinchRelX / lastWidth;
-
+      last.x.value = calcZoomCenter(
+        last.x.value,
+        lastScale,
+        newScale,
+        pinchStart.x.value,
+        layout.width
+      );
+      last.y.value = calcZoomCenter(
+        last.y.value,
+        lastScale,
+        newScale,
+        pinchStart.x.value,
+        layout.width
+      );
       last.scale.value = newScale;
-      last.width.value = newWidth;
-      last.x.value =
-        lastX + lastWidth * pinchRatio + origWidth * -pinchRatio * newScale;
       eventScale.value = 1;
     });
 
@@ -53,19 +58,30 @@ export const NewReactNativeZoomableView = ({ children }) => {
     let { width: origWidth } = layout;
     if (!origWidth) return {};
 
-    const lastX = last.x.value;
     const lastScale = last.scale.value;
-    const lastWidth = last.width.value;
-    const pinchX = pinchStart.x.value;
-    const pinchRelX = pinchX - lastX - origWidth / 2;
-    const pinchRatio = pinchRelX / lastWidth;
+    const newScale = lastScale * eventScale.value;
+
+    const newX = calcZoomCenter(
+      last.x.value,
+      lastScale,
+      newScale,
+      pinchStart.x.value,
+      origWidth
+    );
+
+    const newY = calcZoomCenter(
+      last.y.value,
+      lastScale,
+      newScale,
+      pinchStart.y.value,
+      origWidth
+    );
 
     return {
       transform: [
-        { translateX: lastX },
-        { translateX: lastWidth * pinchRatio },
-        { scale: lastScale * eventScale.value },
-        { translateX: origWidth * -pinchRatio },
+        { translateX: newX },
+        { translateY: newY },
+        { scale: newScale },
       ],
     };
   });
@@ -105,6 +121,21 @@ export const NewReactNativeZoomableView = ({ children }) => {
       </Animated.View>
     </GestureDetector>
   );
+};
+
+const calcZoomCenter = (
+  lastX: number,
+  lastScale: number,
+  newScale: number,
+  pinchX: number,
+  origWidth: number
+) => {
+  'worklet';
+  const lastWidth = origWidth * lastScale;
+  const pinchRelX = pinchX - lastX - origWidth / 2;
+  const pinchRatio = pinchRelX / lastWidth;
+
+  return lastX + lastWidth * pinchRatio + origWidth * -pinchRatio * newScale;
 };
 
 const Rect = ({

@@ -47,16 +47,15 @@ export const NewReactNativeZoomableView = ({ children }) => {
         last.y.value,
         lastScale,
         newScale,
-        pinchStart.x.value,
-        layout.width
+        pinchStart.y.value,
+        layout.height
       );
       last.scale.value = newScale;
       eventScale.value = 1;
     });
 
   const animatedStyles = useAnimatedStyle(() => {
-    let { width: origWidth } = layout;
-    if (!origWidth) return {};
+    if (!layout.width || !layout.height) return {};
 
     const lastScale = last.scale.value;
     const newScale = lastScale * eventScale.value;
@@ -66,7 +65,7 @@ export const NewReactNativeZoomableView = ({ children }) => {
       lastScale,
       newScale,
       pinchStart.x.value,
-      origWidth
+      layout.width
     );
 
     const newY = calcZoomCenter(
@@ -74,7 +73,7 @@ export const NewReactNativeZoomableView = ({ children }) => {
       lastScale,
       newScale,
       pinchStart.y.value,
-      origWidth
+      layout.height
     );
 
     return {
@@ -97,15 +96,15 @@ export const NewReactNativeZoomableView = ({ children }) => {
       <Animated.View onLayout={(e) => setLayout(e.nativeEvent.layout)}>
         <Animated.View style={[animatedStyles, { opacity: 0.5 }]}>
           {children}
-          <Rect left={0} width={75} color={'red'} />
-          <Rect left={75} width={75} color={'green'} />
-          <Rect left={150} width={75} color={'blue'} />
-          <Rect left={225} width={75} color={'wheat'} />
+          <Rect top={'0%'} height={'25%'} color={'red'} />
+          <Rect top={'25%'} height={'25%'} color={'green'} />
+          <Rect top={'50%'} height={'25%'} color={'blue'} />
+          <Rect top={'75%'} height={'25%'} color={'wheat'} />
         </Animated.View>
-        <Rect left={0} width={75} color={'red'} />
-        <Rect left={75} width={75} color={'green'} />
-        <Rect left={150} width={75} color={'blue'} />
-        <Rect left={225} width={75} color={'wheat'} />
+        <Rect top={'0%'} height={'25%'} color={'red'} />
+        <Rect top={'25%'} height={'25%'} color={'green'} />
+        <Rect top={'50%'} height={'25%'} color={'blue'} />
+        <Rect top={'75%'} height={'25%'} color={'wheat'} />
         <Animated.View
           style={[
             debugAnimatedStyles,
@@ -139,21 +138,21 @@ const calcZoomCenter = (
 };
 
 const Rect = ({
-  left,
-  width,
+  top,
+  height,
   color,
 }: {
-  left: number;
-  width: number;
+  top: number | string;
+  height: number | string;
   color: string;
 }) => (
   <View
     style={{
       position: 'absolute',
-      left: left,
-      top: 0,
-      height: 490,
-      width: width,
+      top: top,
+      left: 0,
+      width: 300,
+      height: height,
       backgroundColor: color,
     }}
   />

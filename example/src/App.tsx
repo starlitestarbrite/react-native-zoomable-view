@@ -6,7 +6,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import { Markers } from './Markers';
 
 export default function App() {
-  const zoom = useSharedValue(1);
+  const scale = useSharedValue(1);
   const [showMarkers, setShowMarkers] = React.useState(true);
 
   return (
@@ -16,14 +16,14 @@ export default function App() {
         <NewReactNativeZoomableView
           // TODO: maxZoom
           // TODO: initialZoom
-          zoomAnimatedValue={zoom}
+          scaleValue={scale}
         >
           <View style={styles.contents}>
             <Image
               style={styles.img}
               source={{ uri: 'https://placekitten.com/400/400' }}
             />
-            {showMarkers && <Markers zoom={zoom} />}
+            {showMarkers && <Markers scale={scale} />}
           </View>
         </NewReactNativeZoomableView>
       </View>

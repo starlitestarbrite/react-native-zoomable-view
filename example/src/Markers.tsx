@@ -9,19 +9,19 @@ import Animated, {
 // Scale-independent markers!
 // These markers will move and zoom with the image, but will retain their size
 // becuase of the scale transformation.
-export const Markers = ({ zoom }: { zoom: SharedValue<number> }) => (
+export const Markers = ({ scale }: { scale: SharedValue<number> }) => (
   <>
     {[20, 40, 60, 80].map((left) =>
       [20, 40, 60, 80].map((top) => (
-        <Marker left={left} top={top} zoom={zoom} />
+        <Marker left={left} top={top} scale={scale} />
       ))
     )}
   </>
 );
 
-const Marker = ({ left, top, zoom }) => {
+const Marker = ({ left, top, scale }) => {
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 / zoom.value }],
+    transform: [{ scale: 1 / scale.value }],
   }));
   const position = { left: `${left}%`, top: `${top}%` };
   const key = `${left}x${top}`;

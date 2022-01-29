@@ -9,10 +9,10 @@ import { pinchTranslate, pinchDragTranslate } from './helper/pinchTranslate';
 
 export const NewReactNativeZoomableView = ({
   children,
-  zoomAnimatedValue,
+  scaleValue,
 }: {
   children: React.ReactNode;
-  zoomAnimatedValue: SharedValue<number>;
+  scaleValue: SharedValue<number>;
 }) => {
   const [layout, setLayout] = useState({ height: 0, width: 0 });
   const pinchStart = { x: useSharedValue(0), y: useSharedValue(0) };
@@ -25,6 +25,12 @@ export const NewReactNativeZoomableView = ({
   const pinchDrag = { x: useSharedValue(0), y: useSharedValue(0) };
   const lastPinchDrag = { x: useSharedValue(0), y: useSharedValue(0) };
 
+  const updateProps = ({ scale }) => {
+    'worklet';
+
+    if (scaleValue) scaleValue.value = scale;
+  };
+
   const pinchGesture = Gesture.Pinch()
     .onBegin((event) => {
       'worklet';
@@ -35,9 +41,9 @@ export const NewReactNativeZoomableView = ({
       'worklet';
       eventScale.value = event.scale;
 
-      // Update the sharedValue props
-      zoomAnimatedValue.value = event.scale;
-      // todo: other callback props
+      updateProps({
+        scale: last.scale.value * event.scale,
+      });
 
       pinchDrag.x.value = event.focalX - pinchStart.x.value;
       pinchDrag.y.value = event.focalY - pinchStart.y.value;
@@ -51,9 +57,7 @@ export const NewReactNativeZoomableView = ({
       last.y.value = y;
       last.scale.value = scale;
 
-      // Update the sharedValue props
-      zoomAnimatedValue.value = scale;
-      // todo: other props
+      updateProps({ scale });
 
       eventScale.value = 1;
       lastPinchDrag.x.value += pinchDrag.x.value / scale;

@@ -162,5 +162,7 @@ const calcNewCenterOffsetAfterZoom = (
     // then we move the zoom center back the same distance ratio,
     // but since the newSize is now scaled, the ratio brings us to the new center offset
     newSize * -pinchDistanceRatio
+    // To make it easy to understand this math,
+    // try visualizing with lastCenterOffset = 0 first
   );
 };

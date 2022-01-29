@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -8,28 +7,36 @@ import Animated, {
 
 export const NewReactNativeZoomableView = ({ children }) => {
   const [layout, setLayout] = useState({ height: 0, width: 0 });
-
-  const pinchStart = {
-    x: useSharedValue(0),
-    y: useSharedValue(0),
-  };
+  const pinchStart = { x: useSharedValue(0), y: useSharedValue(0) };
   const eventScale = useSharedValue(1);
-
   const last = {
     x: useSharedValue(0),
     y: useSharedValue(0),
     scale: useSharedValue(1),
-    // width: useSharedValue(300),
-    // height: useSharedValue(500),
   };
-
   const pinchDrag = { x: useSharedValue(0), y: useSharedValue(0) };
   const lastPinchDrag = { x: useSharedValue(0), y: useSharedValue(0) };
+
+  const dragOffset = { x: useSharedValue(0), y: useSharedValue(0) };
+  const dragStart = { x: useSharedValue(0), y: useSharedValue(0) };
+  const dragGesture = Gesture.Pan()
+    .averageTouches(true)
+    .maxPointers(1)
+    .onBegin(() => {})
+    .onUpdate((e) => {
+      'worklet';
+      dragOffset.x.value = e.translationX + dragStart.x.value;
+      dragOffset.y.value = e.translationY + dragStart.y.value;
+    })
+    .onEnd(() => {
+      'worklet';
+      dragStart.x.value = dragOffset.x.value;
+      dragStart.y.value = dragOffset.y.value;
+    });
 
   const zoomGesture = Gesture.Pinch()
     .onBegin((event) => {
       'worklet';
-      // Get the point where we started pinching
       pinchStart.x.value = event.focalX;
       pinchStart.y.value = event.focalY;
     })
@@ -57,9 +64,9 @@ export const NewReactNativeZoomableView = ({ children }) => {
         pinchStart.y.value,
         layout.height
       );
+
       last.scale.value = newScale;
       eventScale.value = 1;
-
       lastPinchDrag.x.value += pinchDrag.x.value / newScale;
       lastPinchDrag.y.value += pinchDrag.y.value / newScale;
       pinchDrag.x.value = 0;
@@ -109,28 +116,9 @@ export const NewReactNativeZoomableView = ({ children }) => {
   });
 
   return (
-    <GestureDetector gesture={Gesture.Simultaneous(zoomGesture)}>
+    <GestureDetector gesture={Gesture.Simultaneous(zoomGesture, dragGesture)}>
       <Animated.View onLayout={(e) => setLayout(e.nativeEvent.layout)}>
-        <Animated.View style={[animatedStyles, { opacity: 0.5 }]}>
-          {/* {children} */}
-          <View style={{ width: '100%', height: '100%' }}>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((x) =>
-              [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((y) => (
-                <View
-                  key={`${x}-${y}`}
-                  style={{
-                    left: x * 30 - 10,
-                    top: y * 30 - 10,
-                    width: 10,
-                    height: 10,
-                    backgroundColor: 'red',
-                    position: 'absolute',
-                  }}
-                />
-              ))
-            )}
-          </View>
-        </Animated.View>
+        <Animated.View style={[animatedStyles]}>{children}</Animated.View>
       </Animated.View>
     </GestureDetector>
   );

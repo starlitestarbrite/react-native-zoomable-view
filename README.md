@@ -13,7 +13,7 @@ This is the v3 rewrite of this package, with `react-native-reanimated` and `reac
 
 ## Preview
 
-![](https://thumbs.gfycat.com/PalatableMeanGnat-size_restricted.gif)
+https://user-images.githubusercontent.com/42827/151675363-3c901a36-88c7-4372-bcd5-e2499dd5fb40.mov
 
 ## Getting started
 

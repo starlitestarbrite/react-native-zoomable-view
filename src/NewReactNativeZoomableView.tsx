@@ -30,32 +30,42 @@ export const NewReactNativeZoomableView = ({ children }) => {
     })
     .onEnd(() => {
       'worklet';
-      const oldScale = last.scale.value;
-      const newScale = oldScale * eventScale.value;
+      const lastScale = last.scale.value;
+      const newScale = lastScale * eventScale.value;
 
-      const oldWidth = layout.width * oldScale;
+      const lastWidth = last.width.value;
       const newWidth = layout.width * newScale;
+
+      const origWidth = layout.width;
+      const lastX = last.x.value;
+      const pinchX = pinchStart.x.value;
+      const pinchRelX = pinchX - lastX - origWidth / 2;
+      const pinchRatio = pinchRelX / lastWidth;
 
       last.scale.value = newScale;
       last.width.value = newWidth;
-      last.x.value = last.x.value - oldWidth / 2 + newWidth / 2;
+      last.x.value =
+        lastX + lastWidth * pinchRatio + origWidth * -pinchRatio * newScale;
       eventScale.value = 1;
     });
 
   const animatedStyles = useAnimatedStyle(() => {
-    let { width } = layout;
-    if (!width) return {};
+    let { width: origWidth } = layout;
+    if (!origWidth) return {};
 
     const lastX = last.x.value;
     const lastScale = last.scale.value;
-    const scaledWidth = width * lastScale;
+    const lastWidth = last.width.value;
+    const pinchX = pinchStart.x.value;
+    const pinchRelX = pinchX - lastX - origWidth / 2;
+    const pinchRatio = pinchRelX / lastWidth;
 
     return {
       transform: [
         { translateX: lastX },
-        { translateX: scaledWidth * (-1 / 2) },
+        { translateX: lastWidth * pinchRatio },
         { scale: lastScale * eventScale.value },
-        { translateX: width * (1 / 2) },
+        { translateX: origWidth * -pinchRatio },
       ],
     };
   });
@@ -76,6 +86,10 @@ export const NewReactNativeZoomableView = ({ children }) => {
           <Rect left={150} width={75} color={'blue'} />
           <Rect left={225} width={75} color={'wheat'} />
         </Animated.View>
+        <Rect left={0} width={75} color={'red'} />
+        <Rect left={75} width={75} color={'green'} />
+        <Rect left={150} width={75} color={'blue'} />
+        <Rect left={225} width={75} color={'wheat'} />
         <Animated.View
           style={[
             debugAnimatedStyles,

@@ -14,7 +14,9 @@ import { ReactNativeZoomableViewProps } from './typings';
 // for better performance and much shorter code.
 
 // TODO:
-// - Lifting one finger from a pinch gesture does not pan just yet.
+// There is a jump in the following situation:
+// Two finger pinch / drag -> 1 finger drag -> 2 finger drag
+// The focal offset is not being reapplied perfectly.
 
 export const ReactNativeZoomableView = ({
   children,
@@ -34,6 +36,12 @@ export const ReactNativeZoomableView = ({
   };
   const pinchDrag = { x: useSharedValue(0), y: useSharedValue(0) };
   const lastPinchDrag = { x: useSharedValue(0), y: useSharedValue(0) };
+  const oneFingerPinching = useSharedValue(false);
+  const oneFingerPinchingOffset = {
+    x: useSharedValue(0),
+    y: useSharedValue(0),
+  };
+  const lastEvent = { focalX: useSharedValue(0), focalY: useSharedValue(0) };
 
   const updateProps = ({ scale }) => {
     'worklet';
@@ -53,16 +61,36 @@ export const ReactNativeZoomableView = ({
       // TODO: Handle lifting one finger from the pinch and continuing to drag
       // by using an offset value from `focalX` when `event.numberOfPointers` becomes 1.
       if (event.numberOfPointers === 2) {
+        lastEvent.focalX.value = event.focalX;
+        lastEvent.focalY.value = event.focalY;
+        if (oneFingerPinching.value === true) {
+          // We just transitioned from one-finger pinching to two-finger pinching
+          // TODO: This is where we need to revert the offset from the one-finger pinch.
+          oneFingerPinching.value = false;
+        }
         pinchDrag.x.value = event.focalX - pinchStart.x.value;
         pinchDrag.y.value = event.focalY - pinchStart.y.value;
         eventScale.value = clamp(event.scale, minZoom, maxZoom);
-        // Max/min values
         let scale = clamp(
           last.scale.value * eventScale.value,
           minZoom,
           maxZoom
         );
         updateProps({ scale });
+      } else {
+        if (!oneFingerPinching.value) {
+          // Just started one-finger pinching
+          const x = event.focalX - lastEvent.focalX.value;
+          const y = event.focalY - lastEvent.focalY.value;
+          oneFingerPinchingOffset.x.value = x;
+          oneFingerPinchingOffset.y.value = y;
+          oneFingerPinching.value = true;
+        }
+
+        pinchDrag.x.value =
+          event.focalX - oneFingerPinchingOffset.x.value - pinchStart.x.value;
+        pinchDrag.y.value =
+          event.focalY - oneFingerPinchingOffset.y.value - pinchStart.y.value;
       }
     })
     .onEnd(() => {

@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+  SharedValue,
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated';
+import { pinchTranslate, pinchDragTranslate } from './helper/pinchTranslate';
 
-export const NewReactNativeZoomableView = ({ children }) => {
+export const NewReactNativeZoomableView = ({
+  children,
+  zoomAnimatedValue,
+}: {
+  children: React.ReactNode;
+  zoomAnimatedValue: SharedValue<number>;
+}) => {
   const [layout, setLayout] = useState({ height: 0, width: 0 });
   const pinchStart = { x: useSharedValue(0), y: useSharedValue(0) };
   const eventScale = useSharedValue(1);
@@ -16,6 +24,43 @@ export const NewReactNativeZoomableView = ({ children }) => {
   };
   const pinchDrag = { x: useSharedValue(0), y: useSharedValue(0) };
   const lastPinchDrag = { x: useSharedValue(0), y: useSharedValue(0) };
+
+  const pinchGesture = Gesture.Pinch()
+    .onBegin((event) => {
+      'worklet';
+      pinchStart.x.value = event.focalX;
+      pinchStart.y.value = event.focalY;
+    })
+    .onUpdate((event) => {
+      'worklet';
+      eventScale.value = event.scale;
+
+      // Update the sharedValue props
+      zoomAnimatedValue.value = event.scale;
+      // todo: other callback props
+
+      pinchDrag.x.value = event.focalX - pinchStart.x.value;
+      pinchDrag.y.value = event.focalY - pinchStart.y.value;
+    })
+    .onEnd(() => {
+      'worklet';
+      const lastScale = last.scale.value;
+      const scale = lastScale * eventScale.value;
+      const { x, y } = pinchTranslate(last, scale, pinchStart, layout);
+      last.x.value = x;
+      last.y.value = y;
+      last.scale.value = scale;
+
+      // Update the sharedValue props
+      zoomAnimatedValue.value = scale;
+      // todo: other props
+
+      eventScale.value = 1;
+      lastPinchDrag.x.value += pinchDrag.x.value / scale;
+      lastPinchDrag.y.value += pinchDrag.y.value / scale;
+      pinchDrag.x.value = 0;
+      pinchDrag.y.value = 0;
+    });
 
   const dragOffset = { x: useSharedValue(0), y: useSharedValue(0) };
   const dragStart = { x: useSharedValue(0), y: useSharedValue(0) };
@@ -34,123 +79,39 @@ export const NewReactNativeZoomableView = ({ children }) => {
       dragStart.y.value = dragOffset.y.value;
     });
 
-  const zoomGesture = Gesture.Pinch()
-    .onBegin((event) => {
-      'worklet';
-      pinchStart.x.value = event.focalX;
-      pinchStart.y.value = event.focalY;
-    })
-    .onUpdate((event) => {
-      'worklet';
-      eventScale.value = event.scale;
-      pinchDrag.x.value = event.focalX - pinchStart.x.value;
-      pinchDrag.y.value = event.focalY - pinchStart.y.value;
-    })
-    .onEnd(() => {
-      'worklet';
-      const lastScale = last.scale.value;
-      const newScale = lastScale * eventScale.value;
-      last.x.value = calcNewCenterOffsetAfterZoom(
-        last.x.value,
-        lastScale,
-        newScale,
-        pinchStart.x.value,
-        layout.width
-      );
-      last.y.value = calcNewCenterOffsetAfterZoom(
-        last.y.value,
-        lastScale,
-        newScale,
-        pinchStart.y.value,
-        layout.height
-      );
-
-      last.scale.value = newScale;
-      eventScale.value = 1;
-      lastPinchDrag.x.value += pinchDrag.x.value / newScale;
-      lastPinchDrag.y.value += pinchDrag.y.value / newScale;
-      pinchDrag.x.value = 0;
-      pinchDrag.y.value = 0;
-    });
-
   const animatedStyles = useAnimatedStyle(() => {
-    let { width: origWidth, height: origHeight } = layout;
-    if (!origWidth) return {};
+    if (!layout.width || !layout.height) return {};
 
     const lastScale = last.scale.value;
-    const newScale = lastScale * eventScale.value;
+    const scale = last.scale.value * eventScale.value;
 
-    const newX = calcNewCenterOffsetAfterZoom(
-      last.x.value,
-      lastScale,
-      newScale,
-      pinchStart.x.value,
-      origWidth
-    );
+    // Zoom offset
+    const { x, y } = pinchTranslate(last, scale, pinchStart, layout);
 
-    const newY = calcNewCenterOffsetAfterZoom(
-      last.y.value,
+    // Pinch drag offset comes after the scale
+    const { x: dragX, y: dragY } = pinchDragTranslate(
+      lastPinchDrag,
+      pinchDrag,
       lastScale,
-      newScale,
-      pinchStart.y.value,
-      origHeight
+      eventScale
     );
 
     return {
       transform: [
-        { translateX: newX },
-        { translateY: newY },
-        { scale: newScale },
-        {
-          translateX:
-            lastPinchDrag.x.value +
-            pinchDrag.x.value / (lastScale * eventScale.value),
-        },
-        {
-          translateY:
-            lastPinchDrag.y.value +
-            pinchDrag.y.value / (lastScale * eventScale.value),
-        },
+        { translateX: x },
+        { translateY: y },
+        { scale },
+        { translateX: dragX },
+        { translateY: dragY },
       ],
     };
   });
 
   return (
-    <GestureDetector gesture={Gesture.Simultaneous(zoomGesture, dragGesture)}>
+    <GestureDetector gesture={Gesture.Simultaneous(pinchGesture, dragGesture)}>
       <Animated.View onLayout={(e) => setLayout(e.nativeEvent.layout)}>
         <Animated.View style={[animatedStyles]}>{children}</Animated.View>
       </Animated.View>
     </GestureDetector>
-  );
-};
-
-const calcNewCenterOffsetAfterZoom = (
-  lastCenterOffset: number, // x or y
-  lastScale: number,
-  newScale: number,
-  // x or y
-  // The focal point of the pinch gesture
-  pinchFocalPoint: number,
-  origSize: number // width or height
-) => {
-  'worklet';
-  const lastSize = origSize * lastScale;
-  const newSize = origSize * newScale;
-  const lastCenterPosition = lastCenterOffset + origSize / 2;
-  const pinchAndCenterDistance = pinchFocalPoint - lastCenterPosition;
-  const pinchDistanceRatio = pinchAndCenterDistance / lastSize;
-
-  return (
-    // start out with the previous offset
-    lastCenterOffset +
-    // since react native zooms from the center of the object,
-    // we move the this center to the pinch position
-    lastSize * pinchDistanceRatio +
-    // at the pinch position, we apply scale to get newSize,
-    // then we move the zoom center back the same distance ratio,
-    // but since the newSize is now scaled, the ratio brings us to the new center offset
-    newSize * -pinchDistanceRatio
-    // To make it easy to understand this math,
-    // try visualizing with lastCenterOffset = 0 first
   );
 };

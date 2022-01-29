@@ -1,18 +1,24 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, Image, Animated, Button } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  // Animated, Button
+} from 'react-native';
 import { NewReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
 
 export default function App() {
   // const zoomAnimatedValue = React.useRef(new Animated.Value(1)).current;
   // const scale = Animated.divide(1, zoomAnimatedValue);
-  const [showMarkers, setShowMarkers] = React.useState(true);
+  // const [showMarkers, setShowMarkers] = React.useState(true);
 
   return (
     <View style={styles.container}>
       <Text>ReactNativeZoomableView</Text>
       <View style={styles.box}>
-        <NewReactNativeZoomableView contentWidth={400} contentHeight={400}>
+        <NewReactNativeZoomableView>
           <Image
             style={styles.img}
             source={{ uri: 'https://placekitten.com/400/400' }}

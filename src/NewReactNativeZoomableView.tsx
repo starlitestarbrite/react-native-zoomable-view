@@ -50,16 +50,14 @@ export const NewReactNativeZoomableView = ({ children }) => {
       'worklet';
       const lastScale = last.scale.value;
       const newScale = lastScale * eventScale.value;
-
-      last.x.value = calcZoomCenter(
+      last.x.value = calcNewCenterOffsetAfterZoom(
         last.x.value,
         lastScale,
         newScale,
         pinchStart.x.value,
         layout.width
       );
-
-      last.y.value = calcZoomCenter(
+      last.y.value = calcNewCenterOffsetAfterZoom(
         last.y.value,
         lastScale,
         newScale,
@@ -82,7 +80,7 @@ export const NewReactNativeZoomableView = ({ children }) => {
     const lastScale = last.scale.value;
     const newScale = lastScale * eventScale.value;
 
-    const newX = calcZoomCenter(
+    const newX = calcNewCenterOffsetAfterZoom(
       last.x.value,
       lastScale,
       newScale,
@@ -90,7 +88,7 @@ export const NewReactNativeZoomableView = ({ children }) => {
       origWidth
     );
 
-    const newY = calcZoomCenter(
+    const newY = calcNewCenterOffsetAfterZoom(
       last.y.value,
       lastScale,
       newScale,
@@ -126,17 +124,31 @@ export const NewReactNativeZoomableView = ({ children }) => {
   );
 };
 
-const calcZoomCenter = (
-  lastX: number,
+const calcNewCenterOffsetAfterZoom = (
+  lastCenterOffset: number, // x or y
   lastScale: number,
   newScale: number,
-  pinchX: number,
-  origWidth: number
+  // x or y
+  // The focal point of the pinch gesture
+  pinchFocalPoint: number,
+  origSize: number // width or height
 ) => {
   'worklet';
-  const lastWidth = origWidth * lastScale;
-  const pinchRelX = pinchX - lastX - origWidth / 2;
-  const pinchRatio = pinchRelX / lastWidth;
+  const lastSize = origSize * lastScale;
+  const newSize = origSize * newScale;
+  const lastCenterPosition = lastCenterOffset + origSize / 2;
+  const pinchAndCenterDistance = pinchFocalPoint - lastCenterPosition;
+  const pinchDistanceRatio = pinchAndCenterDistance / lastSize;
 
-  return lastX + lastWidth * pinchRatio + origWidth * -pinchRatio * newScale;
+  return (
+    // start out with the previous offset
+    lastCenterOffset +
+    // since react native zooms from the center of the object,
+    // we move the this center to the pinch position
+    lastSize * pinchDistanceRatio +
+    // at the pinch position, we apply scale to get newSize,
+    // then we move the zoom center back the same distance ratio,
+    // but since the newSize is now scaled, the ratio brings us to the new center offset
+    newSize * -pinchDistanceRatio
+  );
 };

@@ -9,15 +9,18 @@ import Animated, {
 export const NewReactNativeZoomableView = ({ children }) => {
   const [layout, setLayout] = useState({ height: 0, width: 0 });
 
-  const pinchStart = { x: useSharedValue(0), y: useSharedValue(0) };
+  const pinchStart = {
+    x: useSharedValue(0),
+    y: useSharedValue(0),
+  };
   const eventScale = useSharedValue(1);
 
   const last = {
     x: useSharedValue(0),
     y: useSharedValue(0),
     scale: useSharedValue(1),
-    width: useSharedValue(300),
-    height: useSharedValue(500),
+    // width: useSharedValue(300),
+    // height: useSharedValue(500),
   };
 
   const pinchDrag = { x: useSharedValue(0), y: useSharedValue(0) };
@@ -40,26 +43,44 @@ export const NewReactNativeZoomableView = ({ children }) => {
       'worklet';
       const lastScale = last.scale.value;
       const newScale = lastScale * eventScale.value;
+      // <<<<<<< HEAD
 
-      const lastWidth = last.width.value;
-      const lastHeight = last.height.value;
-      const newWidth = layout.width * newScale;
-      const newHeight = layout.height * newScale;
+      // const lastWidth = last.width.value;
+      // const lastHeight = last.height.value;
+      // const newWidth = layout.width * newScale;
+      // const newHeight = layout.height * newScale;
 
-      const origWidth = layout.width;
-      const lastX = last.x.value;
-      const lastY = last.y.value;
-      const pinchX = pinchStart.x.value;
-      const pinchRelX = pinchX - lastX - origWidth / 2;
-      const pinchRatio = pinchRelX / lastWidth;
+      // const origWidth = layout.width;
+      // const lastX = last.x.value;
+      // const lastY = last.y.value;
+      // const pinchX = pinchStart.x.value;
+      // const pinchRelX = pinchX - lastX - origWidth / 2;
+      // const pinchRatio = pinchRelX / lastWidth;
 
+      // last.scale.value = newScale;
+      // last.width.value = newWidth;
+      // last.height.value = newHeight;
+      // last.x.value =
+      //   lastX + lastWidth * pinchRatio + origWidth * -pinchRatio * newScale;
+      // last.y.value =
+      //   lastY + lastHeight * pinchRatio + origWidth * -pinchRatio * newScale;
+      // =======
+      last.x.value = calcZoomCenter(
+        last.x.value,
+        lastScale,
+        newScale,
+        pinchStart.x.value,
+        layout.width
+      );
+      last.y.value = calcZoomCenter(
+        last.y.value,
+        lastScale,
+        newScale,
+        pinchStart.x.value,
+        layout.width
+      );
       last.scale.value = newScale;
-      last.width.value = newWidth;
-      last.height.value = newHeight;
-      last.x.value =
-        lastX + lastWidth * pinchRatio + origWidth * -pinchRatio * newScale;
-      last.y.value =
-        lastY + lastHeight * pinchRatio + origWidth * -pinchRatio * newScale;
+      // >>>>>>> thomas/next-test
       eventScale.value = 1;
 
       lastPinchDrag.x.value += pinchDrag.x.value / newScale;
@@ -69,29 +90,67 @@ export const NewReactNativeZoomableView = ({ children }) => {
     });
 
   const animatedStyles = useAnimatedStyle(() => {
-    let { width: origWidth, height: origHeight } = layout;
+    let { width: origWidth } = layout;
     if (!origWidth) return {};
 
-    const lastX = last.x.value;
-    const lastY = last.x.value;
+    // <<<<<<< HEAD
+    //     const lastX = last.x.value;
+    //     const lastY = last.x.value;
+    //     const lastScale = last.scale.value;
+    //     const lastWidth = last.width.value;
+    //     const lastHeight = last.height.value;
+    //     const pinchX = pinchStart.x.value;
+    //     const pinchY = pinchStart.y.value;
+    //     const pinchRelX = pinchX - lastX - origWidth / 2;
+    //     const pinchRatio = pinchRelX / lastWidth;
+    // =======
     const lastScale = last.scale.value;
-    const lastWidth = last.width.value;
-    const lastHeight = last.height.value;
-    const pinchX = pinchStart.x.value;
-    const pinchY = pinchStart.y.value;
-    const pinchRelX = pinchX - lastX - origWidth / 2;
-    const pinchRatio = pinchRelX / lastWidth;
+    const newScale = lastScale * eventScale.value;
 
-    const pinchRelY = pinchY - lastY - origHeight / 2;
-    const pinchRatioY = pinchRelY / lastHeight;
+    const newX = calcZoomCenter(
+      last.x.value,
+      lastScale,
+      newScale,
+      pinchStart.x.value,
+      origWidth
+    );
+
+    const newY = calcZoomCenter(
+      last.y.value,
+      lastScale,
+      newScale,
+      pinchStart.y.value,
+      origWidth
+    );
+    // >>>>>>> thomas/next-test
+
+    // const pinchRelY = pinchY - lastY - origHeight / 2;
+    // const pinchRatioY = pinchRelY / lastHeight;
 
     return {
       transform: [
-        { translateX: lastX },
-        { translateX: lastWidth * pinchRatio },
-        { translateY: lastY },
-        // { translateY: lastHeight * pinchRatio },
-        { scale: lastScale * eventScale.value },
+        // <<<<<<< HEAD
+        //         { translateX: lastX },
+        //         { translateX: lastWidth * pinchRatio },
+        //         { translateY: lastY },
+        //         // { translateY: lastHeight * pinchRatio },
+        //         { scale: lastScale * eventScale.value },
+        //         {
+        //           translateX:
+        //             lastPinchDrag.x.value +
+        //             pinchDrag.x.value / (lastScale * eventScale.value),
+        //         },
+        //         {
+        //           translateY:
+        //             lastPinchDrag.y.value +
+        //             pinchDrag.y.value / (lastScale * eventScale.value),
+        //         },
+        //         { translateX: origWidth * -pinchRatio },
+        //         // { translateY: origWidth * -pinchRatioY },
+        // =======
+        { translateX: newX },
+        { translateY: newY },
+        { scale: newScale },
         {
           translateX:
             lastPinchDrag.x.value +
@@ -102,8 +161,7 @@ export const NewReactNativeZoomableView = ({ children }) => {
             lastPinchDrag.y.value +
             pinchDrag.y.value / (lastScale * eventScale.value),
         },
-        { translateX: origWidth * -pinchRatio },
-        // { translateY: origWidth * -pinchRatioY },
+        // >>>>>>> thomas/next-test
       ],
     };
   });
@@ -152,6 +210,21 @@ export const NewReactNativeZoomableView = ({ children }) => {
       </Animated.View>
     </GestureDetector>
   );
+};
+
+const calcZoomCenter = (
+  lastX: number,
+  lastScale: number,
+  newScale: number,
+  pinchX: number,
+  origWidth: number
+) => {
+  'worklet';
+  const lastWidth = origWidth * lastScale;
+  const pinchRelX = pinchX - lastX - origWidth / 2;
+  const pinchRatio = pinchRelX / lastWidth;
+
+  return lastX + lastWidth * pinchRatio + origWidth * -pinchRatio * newScale;
 };
 
 const Rect = ({

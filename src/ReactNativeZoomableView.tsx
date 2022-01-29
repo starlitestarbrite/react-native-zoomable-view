@@ -20,8 +20,8 @@ export const ReactNativeZoomableView = ({
   children,
   scaleValue,
   initialZoom = 1,
-  maxZoom = Infinity,
-  minZoom = 0,
+  maxZoom = 1.5,
+  minZoom = 0.5,
   zoomEnabled = true,
 }: ReactNativeZoomableViewProps) => {
   const [layout, setLayout] = useState({ height: 0, width: 0 });

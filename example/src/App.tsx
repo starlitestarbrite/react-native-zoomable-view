@@ -1,9 +1,11 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, Image, Button } from 'react-native';
+import { StyleSheet, View, Image, Button } from 'react-native';
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
 import { useSharedValue } from 'react-native-reanimated';
 import { Markers } from './Markers';
+
+const uri = 'https://picsum.photos/id/1018/1536/2048';
 
 export default function App() {
   const scale = useSharedValue(1);
@@ -11,7 +13,6 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text>ReactNativeZoomableView</Text>
       <View style={styles.box}>
         <ReactNativeZoomableView
           initialZoom={1}
@@ -19,17 +20,13 @@ export default function App() {
           maxZoom={15}
           scaleValue={scale}
         >
-          <View style={styles.contents}>
-            <Image
-              style={styles.img}
-              source={{ uri: 'https://placekitten.com/400/400' }}
-            />
-            {showMarkers && <Markers scale={scale} />}
-          </View>
+          <Image style={styles.img} source={{ uri }} />
+          {showMarkers && <Markers scale={scale} />}
         </ReactNativeZoomableView>
       </View>
+
       <Button
-        title={`${showMarkers ? 'Hide' : 'Show'} markers`}
+        title="Toggle markers"
         onPress={() => setShowMarkers((value) => !value)}
       />
     </View>
@@ -41,12 +38,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    flexDirection: 'column',
+    // padding: 20,
   },
-  contents: {
-    flexGrow: 1,
-    alignSelf: 'stretch',
+  box: {
+    borderWidth: 0.5,
+    borderRadius: 5,
+    overflow: 'hidden',
+    height: '60%',
+    width: '80%',
   },
-  box: { borderWidth: 5, height: 500, width: 310 },
-  img: { width: '100%', height: '100%', resizeMode: 'contain' },
+  img: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
 });

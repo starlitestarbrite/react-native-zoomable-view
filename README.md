@@ -32,39 +32,11 @@ This is the v3 rewrite of this package, with `react-native-reanimated` and `reac
 
 https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation
 
-### Basic Usage
-
-This component is based on react-natives View, enhanced by panresponders and other events to make it zoomable.
-Therefore no platform specific configuration needs to be done.
-
-Just use it as a drop in component instead of a normal view.
-
-Import ReactNativeZoomableView:
-
-```JSX
-import ReactNativeZoomableView from '@openspacelabs/react-native-zoomable-view/src/ReactNativeZoomableView';
-```
-
-Use the component:
-
-```JSX
-<ReactNativeZoomableView
-   maxZoom={1.5}
-   minZoom={0.5}
-   zoomStep={0.5}
-   initialZoom={1}
-   style={{
-      padding: 10,
-      backgroundColor: 'red',
-   }}
->
-   <Text>This is the content</Text>
-</ReactNativeZoomableView>
-```
-
 ### Example
 
-Here is a full drop in example you can use in Expo, after installing the package.
+An example `expo` project is also included in the `example` directory.
+
+The example project includes resolution-independent markers as an example of how to use the `scaleValue` prop. This value works similarly to a callback, updating when the component's contents are scaled.
 
 ```JSX
 import * as React from 'react';
@@ -80,32 +52,16 @@ export default function App() {
         <ReactNativeZoomableView maxZoom={30}>
           <Image
             style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
-            source={{ uri: 'https://via.placeholder.com/400x200.png' }}
+            source={{ uri: 'https://picsum.photos/200/300' }}
           />
         </ReactNativeZoomableView>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
-  },
-});
 ```
 
 ### Props
-
-#### Options
 
 These options can be used to limit and change the zoom behavior.
 

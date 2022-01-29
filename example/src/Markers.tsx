@@ -6,28 +6,28 @@ import Animated, {
   SharedValue,
 } from 'react-native-reanimated';
 
+// Scale-independent markers!
 // These markers will move and zoom with the image, but will retain their size
 // becuase of the scale transformation.
-export const Markers = ({ zoom }: { zoom: SharedValue<number> }) => {
+export const Markers = ({ zoom }: { zoom: SharedValue<number> }) => (
+  <>
+    {[20, 40, 60, 80].map((left) =>
+      [20, 40, 60, 80].map((top) => (
+        <Marker left={left} top={top} zoom={zoom} />
+      ))
+    )}
+  </>
+);
+
+const Marker = ({ left, top, zoom }) => {
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: 1 / zoom.value }],
   }));
+  const position = { left: `${left}%`, top: `${top}%` };
+  const key = `${left}x${top}`;
 
   return (
-    <>
-      {[20, 40, 60, 80].map((left) =>
-        [20, 40, 60, 80].map((top) => (
-          <Animated.View
-            key={`${left}x${top}`}
-            style={[
-              styles.marker,
-              { left: `${left}%`, top: `${top}%` },
-              animatedStyle,
-            ]}
-          />
-        ))
-      )}
-    </>
+    <Animated.View key={key} style={[styles.marker, position, animatedStyle]} />
   );
 };
 

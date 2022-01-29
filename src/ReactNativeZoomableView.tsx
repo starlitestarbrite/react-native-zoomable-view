@@ -4,7 +4,8 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated';
-import { pinchTranslate, pinchDragTranslate } from './helper/pinchTranslate';
+import { pinchTranslate } from './helper/pinchTranslate';
+import { pinchDragTranslate } from './helper/pinchDragTranslate';
 import { clamp } from './helper/clamp';
 import { ReactNativeZoomableViewProps } from './typings';
 

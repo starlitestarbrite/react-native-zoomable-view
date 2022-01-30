@@ -90,6 +90,10 @@ describe('pinching', () => {
   it('scales from a point', () => {
     act(() => {
       animator.current.onLayout(layoutEvent);
+      animator.current.onPinchBegin({
+        focalX: 75,
+        focalY: 75,
+      });
       animator.current.onPinchUpdate({
         scale: 2,
         focalX: 75,
@@ -99,13 +103,44 @@ describe('pinching', () => {
     });
 
     expect(animator.current.animatedStyles.transform).toEqual([
-      { translateX: 50 },
-      { translateY: 50 },
+      { translateX: -25 },
+      { translateY: -25 },
       { scale: 2 },
-      { translateX: 37.5 },
-      { translateY: 37.5 },
       { translateX: 0 },
       { translateY: 0 },
+      { translateX: 0 },
+      { translateY: 0 },
+    ]);
+  });
+});
+
+describe('multiple gestures', () => {
+  it('drags, then pinches', async () => {
+    act(() => {
+      animator.current.onLayout(layoutEvent);
+      animator.current.onDragUpdate({ translationX: 10, translationY: 10 });
+      animator.current.onDragEnd();
+      animator.current.onPinchBegin({
+        focalX: 75,
+        focalY: 75,
+      });
+      animator.current.onPinchUpdate({
+        scale: 2,
+        focalX: 85,
+        focalY: 75,
+        numberOfPointers: 2,
+      });
+      animator.current.onPinchEnd();
+    });
+
+    expect(animator.current.animatedStyles.transform).toEqual([
+      { translateX: 0 },
+      { translateY: 0 },
+      { scale: 2 },
+      { translateX: 5 },
+      { translateY: 0 },
+      { translateX: 10 },
+      { translateY: 10 },
     ]);
   });
 });

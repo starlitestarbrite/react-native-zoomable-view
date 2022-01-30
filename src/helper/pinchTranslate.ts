@@ -51,5 +51,5 @@ export const pinchTranslate = (
     lastHeight * pinchDistanceRatioY +
     newHeight * -pinchDistanceRatioY;
 
-  return { x, y };
+  return { x: x || 0, y: y || 0 };
 };

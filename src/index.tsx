@@ -1,4 +1,7 @@
 import { ReactNativeZoomableViewProps } from './typings';
 import { ReactNativeZoomableView } from './ReactNativeZoomableView';
+import { useSharedValue } from 'react-native-reanimated';
 
-export { ReactNativeZoomableViewProps, ReactNativeZoomableView };
+export default ReactNativeZoomableView;
+
+export { ReactNativeZoomableViewProps, useSharedValue };

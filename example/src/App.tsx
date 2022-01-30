@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Image, Button } from 'react-native';
-import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
-import { useSharedValue } from 'react-native-reanimated';
+import ReactNativeZoomableView, {
+  useSharedValue,
+} from '@openspacelabs/react-native-zoomable-view';
 import { Markers } from './Markers';
 
 const uri = 'https://picsum.photos/id/1018/1536/2048';

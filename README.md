@@ -42,7 +42,7 @@ The example project includes resolution-independent markers as an example of how
 import * as React from 'react';
 
 import { StyleSheet, View, Text, Image } from 'react-native';
-import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
+import ReactNativeZoomableView from '@openspacelabs/react-native-zoomable-view';
 
 export default function App() {
   return (

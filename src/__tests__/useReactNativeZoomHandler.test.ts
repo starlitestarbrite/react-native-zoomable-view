@@ -7,7 +7,10 @@ import { useReactNativeZoomHandler } from '../useReactNativeZoomHandler';
 const getSharedValue = (value) =>
   renderHook(() => useSharedValue<number>(value)).result.current;
 
-const layoutEvent = { nativeEvent: { layout: { width: 100, height: 100 } } };
+// By default we'll use a 100x100 layout
+const layout = { width: 100, height: 100 };
+// Simulator a layout event, normally passed `onLayout`
+const layoutEvent = { nativeEvent: { layout } };
 
 let animator;
 beforeEach(() => {
@@ -45,6 +48,7 @@ describe('dragging', () => {
     act(() => {
       animator.current.onLayout(layoutEvent);
       animator.current.onDragUpdate({ translationX: 10, translationY: 10 });
+      animator.current.onDragEnd();
       animator.current.onDragUpdate({ translationX: -20, translationY: -20 });
     });
 
@@ -54,8 +58,8 @@ describe('dragging', () => {
       { scale: 1 },
       { translateX: 0 },
       { translateY: 0 },
-      { translateX: -20 },
-      { translateY: -20 },
+      { translateX: -10 },
+      { translateY: -10 },
     ]);
   });
 });

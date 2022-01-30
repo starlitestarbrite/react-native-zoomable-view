@@ -9,7 +9,7 @@ const getSharedValue = (value) =>
 
 // By default we'll use a 100x100 layout
 const layout = { width: 100, height: 100 };
-// Simulator a layout event, normally passed `onLayout`
+// Simulate a layout event, normally passed `onLayout`
 const layoutEvent = { nativeEvent: { layout } };
 
 let animator;
@@ -141,6 +141,55 @@ describe('multiple gestures', () => {
       { translateY: 0 },
       { translateX: 10 },
       { translateY: 10 },
+    ]);
+  });
+});
+
+describe('pinch-drag-pinch', () => {
+  it('goes from two- to one-finger pinch, then back to two-finger', async () => {
+    act(() => {
+      animator.current.onLayout(layoutEvent);
+      animator.current.onPinchBegin({
+        focalX: 75,
+        focalY: 50,
+      });
+      animator.current.onPinchUpdate({
+        scale: 1,
+        focalX: 65,
+        focalY: 50,
+        numberOfPointers: 2,
+      });
+      animator.current.onPinchUpdate({
+        scale: 1,
+        focalX: 55,
+        focalY: 50,
+        numberOfPointers: 1,
+      });
+      animator.current.onPinchUpdate({
+        scale: 1,
+        focalX: 45,
+        focalY: 50,
+        numberOfPointers: 1,
+      });
+      animator.current.onPinchUpdate({
+        scale: 1,
+        focalX: 35,
+        focalY: 50,
+        numberOfPointers: 2,
+      });
+      animator.current.onPinchEnd();
+    });
+
+    // Note: these values are not actually what we want. This test passes
+    // but the animation jumps. See useReactNativeZoomHandler.tsx#61
+    expect(animator.current.animatedStyles.transform).toEqual([
+      { translateX: 0 },
+      { translateY: 0 },
+      { scale: 1 },
+      { translateX: -40 },
+      { translateY: 0 },
+      { translateX: 0 },
+      { translateY: 0 },
     ]);
   });
 });

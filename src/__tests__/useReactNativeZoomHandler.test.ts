@@ -180,13 +180,11 @@ describe('pinch-drag-pinch', () => {
       animator.current.onPinchEnd();
     });
 
-    // Note: these values are not actually what we want. This test passes
-    // but the animation jumps. See useReactNativeZoomHandler.tsx#61
     expect(animator.current.animatedStyles.transform).toEqual([
       { translateX: 0 },
       { translateY: 0 },
       { scale: 1 },
-      { translateX: -40 },
+      { translateX: -20 },
       { translateY: 0 },
       { translateX: 0 },
       { translateY: 0 },

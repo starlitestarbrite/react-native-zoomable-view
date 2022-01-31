@@ -46,6 +46,10 @@ export const useReactNativeZoomHandler = ({
     'worklet';
     pinchStart.x.value = event.focalX;
     pinchStart.y.value = event.focalY;
+
+    oneFingerPinchingOffset.x.value = 0;
+    oneFingerPinchingOffset.y.value = 0;
+    oneFingerPinching.value = event.numberActiveTouches === 1;
   };
 
   const onPinchUpdate = (event) => {
@@ -54,25 +58,31 @@ export const useReactNativeZoomHandler = ({
     // TODO: Handle lifting one finger from the pinch and continuing to drag
     // by using an offset value from `focalX` when `event.numberOfPointers` becomes 1.
     if (event.numberOfPointers === 2) {
-      lastEvent.focalX.value = event.focalX;
-      lastEvent.focalY.value = event.focalY;
       if (oneFingerPinching.value === true) {
         // We just transitioned from one-finger pinching to two-finger pinching
-        // TODO: This is where we need to revert the offset from the one-finger pinch.
         oneFingerPinching.value = false;
+
+        // Calculate how much the pinch has moved since the last time we were in two-finger pinching mode
+        const x = event.focalX - lastEvent.focalX.value;
+        const y = event.focalY - lastEvent.focalY.value;
+        oneFingerPinchingOffset.x.value += x;
+        oneFingerPinchingOffset.y.value += y;
+
+        pinchStart.y.value = event.focalY;
+        pinchStart.x.value = event.focalX;
       }
-      pinchDrag.x.value = event.focalX - pinchStart.x.value;
-      pinchDrag.y.value = event.focalY - pinchStart.y.value;
+      pinchDrag.x.value =
+        event.focalX - oneFingerPinchingOffset.x.value - pinchStart.x.value;
+      pinchDrag.y.value =
+        event.focalY - oneFingerPinchingOffset.y.value - pinchStart.y.value;
       eventScale.value = clamp(event.scale, minZoom, maxZoom);
-      let scale = clamp(last.scale.value * eventScale.value, minZoom, maxZoom);
-      updateProps({ scale });
     } else {
       if (!oneFingerPinching.value) {
         // Just started one-finger pinching
         const x = event.focalX - lastEvent.focalX.value;
         const y = event.focalY - lastEvent.focalY.value;
-        oneFingerPinchingOffset.x.value = x;
-        oneFingerPinchingOffset.y.value = y;
+        oneFingerPinchingOffset.x.value += x;
+        oneFingerPinchingOffset.y.value += y;
         oneFingerPinching.value = true;
       }
 
@@ -81,6 +91,12 @@ export const useReactNativeZoomHandler = ({
       pinchDrag.y.value =
         event.focalY - oneFingerPinchingOffset.y.value - pinchStart.y.value;
     }
+
+    lastEvent.focalX.value = event.focalX;
+    lastEvent.focalY.value = event.focalY;
+
+    let scale = clamp(last.scale.value * eventScale.value, minZoom, maxZoom);
+    updateProps({ scale });
   };
 
   const onPinchEnd = () => {

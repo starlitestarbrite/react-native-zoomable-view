@@ -184,7 +184,7 @@ describe('pinch-drag-pinch', () => {
       { translateX: 0 },
       { translateY: 0 },
       { scale: 1 },
-      { translateX: -20 },
+      { translateX: 20 },
       { translateY: 0 },
       { translateX: 0 },
       { translateY: 0 },

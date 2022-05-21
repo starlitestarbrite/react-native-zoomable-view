@@ -1,12 +1,14 @@
 import React, { Component, createRef, RefObject } from 'react';
 import {
   Animated,
+  Easing,
   GestureResponderEvent,
   InteractionManager,
   PanResponder,
   PanResponderGestureState,
   StyleSheet,
   View,
+  Image,
 } from 'react-native';
 
 import {
@@ -25,6 +27,7 @@ import {
   calcNewScaledOffsetForZoomCentering,
 } from './helper';
 import { applyPanBoundariesToOffset } from './helper/applyPanBoundariesToOffset';
+import { convertPointOnTransformSubjectToPointOnSheet } from './helper/coordinateConversion';
 import {
   getBoundaryCrossedAnim,
   getPanMomentumDecayAnim,
@@ -36,6 +39,7 @@ const initialState = {
   originalHeight: null,
   originalPageX: null,
   originalPageY: null,
+  pinSize: { width: 0, height: 0 },
 } as ReactNativeZoomableViewState;
 
 class ReactNativeZoomableView extends Component<
@@ -65,10 +69,14 @@ class ReactNativeZoomableView extends Component<
     contentHeight: undefined,
     panBoundaryPadding: 0,
     visualTouchFeedbackEnabled: true,
+    staticPinPosition: undefined,
+    staticPinIcon: undefined,
+    onStaticPinPositionChange: undefined,
   };
 
   private panAnim = new Animated.ValueXY({ x: 0, y: 0 });
   private zoomAnim = new Animated.Value(1);
+  private pinAnim = new Animated.ValueXY({ x: 0, y: 0 });
 
   private __offsets = {
     x: {
@@ -157,6 +165,24 @@ class ReactNativeZoomableView extends Component<
     this.lastGestureTouchDistance = 150;
 
     this.gestureType = null;
+  }
+
+  private raisePin() {
+    Animated.timing(this.pinAnim, {
+      toValue: { x: 0, y: -10 },
+      useNativeDriver: true,
+      easing: Easing.out(Easing.ease),
+      duration: 100,
+    }).start();
+  }
+
+  private dropPin() {
+    Animated.timing(this.pinAnim, {
+      toValue: { x: 0, y: 0 },
+      useNativeDriver: true,
+      easing: Easing.out(Easing.ease),
+      duration: 100,
+    }).start();
   }
 
   private set offsetX(x: number) {
@@ -279,6 +305,30 @@ class ReactNativeZoomableView extends Component<
 
     this.props.onTransform?.(zoomableViewEvent);
 
+    if (this.props.staticPinPosition) {
+      const point = convertPointOnTransformSubjectToPointOnSheet({
+        pointOnTransformSubject: {
+          x: this.props.staticPinPosition.left,
+          y: this.props.staticPinPosition.top,
+        },
+        sheetImageSize: {
+          height: this.props.contentHeight,
+          width: this.props.contentWidth,
+        },
+        transformSubject: {
+          offsetX: zoomableViewEvent.offsetX,
+          offsetY: zoomableViewEvent.offsetY,
+          zoomLevel: zoomableViewEvent.zoomLevel,
+          // TODO: Make TransformSubjectData compatible with zoomableViewEvent
+          originalSize: {
+            width: zoomableViewEvent.originalWidth,
+            height: zoomableViewEvent.originalHeight,
+          },
+        },
+      });
+      this.props.onStaticPinPositionChange?.(point);
+    }
+
     return { successful: true };
   }
 
@@ -392,6 +442,8 @@ class ReactNativeZoomableView extends Component<
     this.panAnim.stopAnimation();
     this.zoomAnim.stopAnimation();
     this.gestureStarted = true;
+
+    this.raisePin();
   };
 
   /**
@@ -440,6 +492,8 @@ class ReactNativeZoomableView extends Component<
         this._getZoomableViewEventObject()
       );
     }
+
+    this.dropPin();
 
     this.gestureType = null;
     this.gestureStarted = false;
@@ -723,6 +777,8 @@ class ReactNativeZoomableView extends Component<
     }
 
     this._setNewOffsetPosition(offsetX, offsetY);
+
+    this.raisePin();
   }
 
   /**
@@ -786,6 +842,21 @@ class ReactNativeZoomableView extends Component<
       this.singleTapTimeoutId = setTimeout(() => {
         delete this.doubleTapFirstTapReleaseTimestamp;
         delete this.singleTapTimeoutId;
+
+        console.log(
+          this.doubleTapFirstTap.x,
+          this.doubleTapFirstTap.y,
+          this.zoomLevel
+        );
+
+        if (this.props.staticPinPosition) {
+          this._zoomToLocation(
+            this.doubleTapFirstTap.x + 100,
+            this.doubleTapFirstTap.y + 100,
+            this.zoomLevel * 1.1
+          );
+        }
+
         this.props.onSingleTap?.(e, this._getZoomableViewEventObject());
       }, this.props.doubleTapDelay);
     }
@@ -1027,6 +1098,41 @@ class ReactNativeZoomableView extends Component<
         {(this.state.debugPoints || []).map(({ x, y }, index) => {
           return <DebugTouchPoint key={index} x={x} y={y} />;
         })}
+
+        {this.props.staticPinPosition && (
+          <Animated.View
+            style={[
+              this.props.staticPinPosition,
+              {
+                position: 'absolute',
+                transform: [
+                  {
+                    translateY: -this.state.pinSize.height,
+                  },
+                  {
+                    translateX: -this.state.pinSize.width / 2,
+                  },
+                  ...this.pinAnim.getTranslateTransform(),
+                ],
+              },
+            ]}
+          >
+            <View
+              onLayout={(event) => {
+                this.setState({ pinSize: event.nativeEvent.layout });
+              }}
+            >
+              {this.props.staticPinIcon ? (
+                this.props.staticPinIcon
+              ) : (
+                <Image
+                  source={require('./assets/pin.png')}
+                  style={{ width: 48, height: 64 }}
+                />
+              )}
+            </View>
+          </Animated.View>
+        )}
       </View>
     );
   }
@@ -1045,6 +1151,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
     overflow: 'hidden',
+  },
+  staticPin: {
+    width: 24,
+    height: 32,
   },
 });
 

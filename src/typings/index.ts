@@ -131,11 +131,23 @@ export interface ReactNativeZoomableViewProps extends ViewProps {
     gestureState: PanResponderGestureState,
     zoomableViewEventObject: ZoomableViewEvent
   ) => boolean;
+
+  staticPinPosition?: {
+    left: number;
+    top: number;
+  };
+  staticPinIcon?: React.ReactElement;
+  onStaticPinPositionChange?: (position: Vec2D) => void;
 }
 
 export interface Vec2D {
   x: number;
   y: number;
+}
+
+export interface Size2D {
+  width: number;
+  height: number;
 }
 
 export interface TouchPoint extends Vec2D {
@@ -150,6 +162,7 @@ export interface ReactNativeZoomableViewState {
   originalPageX: number;
   originalPageY: number;
   debugPoints: undefined | Vec2D[];
+  pinSize: Size2D;
 }
 
 export interface ReactNativeZoomableViewWithGesturesProps

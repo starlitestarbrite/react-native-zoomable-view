@@ -269,7 +269,15 @@ class ReactNativeZoomableView extends Component<
       currState.originalPageX !== prevState.originalPageX ||
       currState.originalPageY !== prevState.originalPageY;
 
-    if (this.onTransformInvocationInitialized && originalMeasurementsChanged) {
+    const staticPinPositionChanged =
+      prevProps.staticPinPosition?.left !==
+        this.props.staticPinPosition?.left ||
+      prevProps.staticPinPosition?.top !== this.props.staticPinPosition?.top;
+
+    if (
+      this.onTransformInvocationInitialized &&
+      (originalMeasurementsChanged || staticPinPositionChanged)
+    ) {
       this._invokeOnTransform();
     }
   }
@@ -843,12 +851,6 @@ class ReactNativeZoomableView extends Component<
         delete this.doubleTapFirstTapReleaseTimestamp;
         delete this.singleTapTimeoutId;
 
-        console.log(
-          this.doubleTapFirstTap.x,
-          this.doubleTapFirstTap.y,
-          this.zoomLevel
-        );
-
         if (this.props.staticPinPosition) {
           this._zoomToLocation(
             this.doubleTapFirstTap.x + 100,
@@ -1060,6 +1062,15 @@ class ReactNativeZoomableView extends Component<
   }
 
   render() {
+    const {
+      staticPinIcon,
+      children,
+      visualTouchFeedbackEnabled,
+      doubleTapDelay,
+      staticPinPosition,
+    } = this.props;
+    const { pinSize, touches, debugPoints = [] } = this.state;
+
     return (
       <View
         style={styles.container}
@@ -1079,11 +1090,12 @@ class ReactNativeZoomableView extends Component<
             },
           ]}
         >
-          {this.props.children}
+          {children}
         </Animated.View>
-        {this.props.visualTouchFeedbackEnabled &&
-          this.state.touches?.map((touch) => {
-            const animationDuration = this.props.doubleTapDelay;
+
+        {visualTouchFeedbackEnabled &&
+          touches?.map((touch) => {
+            const animationDuration = doubleTapDelay;
             return (
               <AnimatedTouchFeedback
                 x={touch.x}
@@ -1094,23 +1106,26 @@ class ReactNativeZoomableView extends Component<
               />
             );
           })}
+
         {/* For Debugging Only */}
-        {(this.state.debugPoints || []).map(({ x, y }, index) => {
+        {debugPoints.map(({ x, y }, index) => {
           return <DebugTouchPoint key={index} x={x} y={y} />;
         })}
 
-        {this.props.staticPinPosition && (
+        {staticPinPosition && (
           <Animated.View
             style={[
-              this.props.staticPinPosition,
+              staticPinPosition,
+              styles.pinWrapper,
+              // eslint-disable-next-line react-native/no-inline-styles
               {
-                position: 'absolute',
+                opacity: pinSize.width && pinSize.height ? 1 : 0,
                 transform: [
                   {
-                    translateY: -this.state.pinSize.height,
+                    translateY: -pinSize.height,
                   },
                   {
-                    translateX: -this.state.pinSize.width / 2,
+                    translateX: -pinSize.width / 2,
                   },
                   ...this.pinAnim.getTranslateTransform(),
                 ],
@@ -1118,16 +1133,14 @@ class ReactNativeZoomableView extends Component<
             ]}
           >
             <View
-              onLayout={(event) => {
-                this.setState({ pinSize: event.nativeEvent.layout });
+              onLayout={({ nativeEvent: { layout } }) => {
+                this.setState({ pinSize: layout });
               }}
             >
-              {this.props.staticPinIcon ? (
-                this.props.staticPinIcon
-              ) : (
+              {staticPinIcon || (
                 <Image
                   source={require('./assets/pin.png')}
-                  style={{ width: 48, height: 64 }}
+                  style={styles.pin}
                 />
               )}
             </View>
@@ -1152,9 +1165,12 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
-  staticPin: {
-    width: 24,
-    height: 32,
+  pinWrapper: {
+    position: 'absolute',
+  },
+  pin: {
+    width: 48,
+    height: 64,
   },
 });
 

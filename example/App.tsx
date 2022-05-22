@@ -1,73 +1,40 @@
-import * as React from 'react';
-import { StyleSheet, View, Text, Image, Animated, Button } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, Text, Image, Animated, Button } from 'react-native';
 // @ts-ignore
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
 import { debounce } from 'lodash';
+import { styles } from './style';
 
 export default function App() {
-  const zoomAnimatedValue = React.useRef(new Animated.Value(1)).current;
+  const zoomAnimatedValue = useRef(new Animated.Value(1)).current;
   const scale = Animated.divide(1, zoomAnimatedValue);
-  const [showMarkers, setShowMarkers] = React.useState(true);
+  const [showMarkers, setShowMarkers] = useState(true);
+  const [size, setSize] = useState({ width: 0, height: 0 });
 
-  const [staticPinPosition, setStaticPinPosition] = React.useState({
-    x: 0,
-    y: 0,
-  });
-  const staticPinPositionRef = React.useRef<Animated.ValueXY | null>(
-    new Animated.ValueXY({ x: 0, y: 0 })
-  ).current;
-
-  const updatePositionState = debounce(
-    (value: { x: number; y: number } | null) => {
-      if (!value) {
-        return setStaticPinPosition(null);
-      }
-      const { x, y } = value;
-      setStaticPinPosition({ x, y });
-    },
-    100
-  );
-
-  React.useEffect(() => {
-    const listener = staticPinPositionRef.addListener(updatePositionState);
-    return () => {
-      staticPinPositionRef.removeListener(listener);
-    };
-  });
-
-  const [size, setSize] = React.useState({ width: 0, height: 0 });
+  // Use layout event to get centre point, to set the pin
+  const [pin, setPin] = useState({ x: 0, y: 0 });
+  // Debounce the change event to avoid layout event firing too often while dragging
+  const debouncedUpdatePin = debounce(setPin, 100);
 
   return (
     <View style={styles.container}>
-      <Text>ReactNativeZoomableView ({JSON.stringify(staticPinPosition)})</Text>
-      <View
-        style={styles.box}
-        onLayout={(e) => {
-          setSize(e.nativeEvent.layout);
-        }}
-      >
+      <Text>ReactNativeZoomableView</Text>
+      <View style={styles.box} onLayout={(e) => setSize(e.nativeEvent.layout)}>
         <ReactNativeZoomableView
-          staticPinPosition={{
-            left: size.width / 2 - 10,
-            top: size.height / 2 - 10,
-          }}
+          // Where to put the pin in the content view
+          staticPinPosition={
+            size.width && size.height
+              ? {
+                  left: size.width / 2,
+                  top: size.height / 2,
+                }
+              : undefined
+          }
+          // Callback that returns the position of the pin
+          // on the actual source image
           onStaticPinPositionChange={(position) => {
-            if (position) {
-              staticPinPositionRef.setValue(position);
-            } else {
-              updatePositionState(null);
-            }
+            debouncedUpdatePin(position);
           }}
-          // staticPinIcon={
-          //   <View
-          //     style={{
-          //       width: 20,
-          //       height: 20,
-          //       backgroundColor: 'green',
-          //       borderRadius: 12,
-          //     }}
-          //   />
-          // }
           maxZoom={30}
           initialZoom={1.5}
           // Give these to the zoomable view so it can apply the boundaries around the actual content.
@@ -87,16 +54,15 @@ export default function App() {
             />
 
             {showMarkers &&
-              [20, 40, 60, 80].map((left) =>
-                [20, 40, 60, 80].map((top) => (
+              ['20%', '40%', '60%', '80%'].map((left) =>
+                ['20%', '40%', '60%', '80%'].map((top) => (
                   <Animated.View
                     key={`${left}x${top}`}
                     // These markers will move and zoom with the image, but will retain their size
-                    // becuase of the scale transformation.
+                    // because of the scale transformation.
                     style={[
                       styles.marker,
-                      { left: `${left}%`, top: `${top}%` },
-                      { transform: [{ scale }] },
+                      { left, top, transform: [{ scale }] },
                     ]}
                   />
                 ))
@@ -104,6 +70,10 @@ export default function App() {
           </View>
         </ReactNativeZoomableView>
       </View>
+      <Text>
+        Static pin position:{' '}
+        {pin ? `${Math.round(pin.x)}, ${Math.round(pin.y)}` : 'Off map'}
+      </Text>
       <Button
         title={`${showMarkers ? 'Hide' : 'Show'} markers`}
         onPress={() => setShowMarkers((value) => !value)}
@@ -111,39 +81,3 @@ export default function App() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  contents: {
-    flex: 1,
-    alignSelf: 'stretch',
-  },
-  box: {
-    borderWidth: 5,
-    flexShrink: 1,
-    height: 600,
-    width: 480,
-  },
-  img: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-  },
-  marker: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    width: 20,
-    height: 20,
-    marginLeft: -10,
-    marginTop: -10,
-    borderRadius: 10,
-    backgroundColor: 'white',
-    borderWidth: 2,
-  },
-});

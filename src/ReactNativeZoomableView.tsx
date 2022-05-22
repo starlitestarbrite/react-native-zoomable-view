@@ -313,30 +313,6 @@ class ReactNativeZoomableView extends Component<
 
     this.props.onTransform?.(zoomableViewEvent);
 
-    if (this.props.staticPinPosition) {
-      const point = convertPointOnTransformSubjectToPointOnSheet({
-        pointOnTransformSubject: {
-          x: this.props.staticPinPosition.left,
-          y: this.props.staticPinPosition.top,
-        },
-        sheetImageSize: {
-          height: this.props.contentHeight,
-          width: this.props.contentWidth,
-        },
-        transformSubject: {
-          offsetX: zoomableViewEvent.offsetX,
-          offsetY: zoomableViewEvent.offsetY,
-          zoomLevel: zoomableViewEvent.zoomLevel,
-          // TODO: Make TransformSubjectData compatible with zoomableViewEvent
-          originalSize: {
-            width: zoomableViewEvent.originalWidth,
-            height: zoomableViewEvent.originalHeight,
-          },
-        },
-      });
-      this.props.onStaticPinPositionChange?.(point);
-    }
-
     return { successful: true };
   }
 
@@ -499,6 +475,31 @@ class ReactNativeZoomableView extends Component<
         gestureState,
         this._getZoomableViewEventObject()
       );
+    }
+
+    const zoomableViewEvent = this._getZoomableViewEventObject();
+    if (this.props.staticPinPosition) {
+      const point = convertPointOnTransformSubjectToPointOnSheet({
+        pointOnTransformSubject: {
+          x: this.props.staticPinPosition.left,
+          y: this.props.staticPinPosition.top,
+        },
+        sheetImageSize: {
+          height: this.props.contentHeight,
+          width: this.props.contentWidth,
+        },
+        transformSubject: {
+          offsetX: zoomableViewEvent.offsetX,
+          offsetY: zoomableViewEvent.offsetY,
+          zoomLevel: zoomableViewEvent.zoomLevel,
+          // TODO: Make TransformSubjectData compatible with zoomableViewEvent
+          originalSize: {
+            width: zoomableViewEvent.originalWidth,
+            height: zoomableViewEvent.originalHeight,
+          },
+        },
+      });
+      this.props.onStaticPinPositionChange?.(point);
     }
 
     this.dropPin();

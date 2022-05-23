@@ -72,6 +72,7 @@ class ReactNativeZoomableView extends Component<
     staticPinPosition: undefined,
     staticPinIcon: undefined,
     onStaticPinPositionChange: undefined,
+    animatePin: true,
   };
 
   private panAnim = new Animated.ValueXY({ x: 0, y: 0 });
@@ -168,6 +169,7 @@ class ReactNativeZoomableView extends Component<
   }
 
   private raisePin() {
+    if (!this.props.animatePin) return;
     Animated.timing(this.pinAnim, {
       toValue: { x: 0, y: -10 },
       useNativeDriver: true,
@@ -177,6 +179,7 @@ class ReactNativeZoomableView extends Component<
   }
 
   private dropPin() {
+    if (!this.props.animatePin) return;
     Animated.timing(this.pinAnim, {
       toValue: { x: 0, y: 0 },
       useNativeDriver: true,

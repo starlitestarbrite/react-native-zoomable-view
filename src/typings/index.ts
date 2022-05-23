@@ -138,6 +138,7 @@ export interface ReactNativeZoomableViewProps extends ViewProps {
   };
   staticPinIcon?: React.ReactElement;
   onStaticPinPositionChange?: (position: Vec2D) => void;
+  animatePin: boolean;
 }
 
 export interface Vec2D {

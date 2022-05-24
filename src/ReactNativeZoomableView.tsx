@@ -859,7 +859,7 @@ class ReactNativeZoomableView extends Component<
           this._zoomToLocation(
             this.doubleTapFirstTap.x + 100,
             this.doubleTapFirstTap.y + 100,
-            this.zoomLevel * 1.1
+            this.zoomLevel
           );
         }
 

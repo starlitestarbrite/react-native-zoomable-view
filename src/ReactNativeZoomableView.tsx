@@ -27,7 +27,7 @@ import {
   calcNewScaledOffsetForZoomCentering,
 } from './helper';
 import { applyPanBoundariesToOffset } from './helper/applyPanBoundariesToOffset';
-import { convertPointOnTransformSubjectToPointOnSheet } from './helper/coordinateConversion';
+import { convertPointOnTransformSubjectToPointOnImage } from './helper/coordinateConversion';
 import {
   getBoundaryCrossedAnim,
   getPanMomentumDecayAnim,
@@ -480,29 +480,8 @@ class ReactNativeZoomableView extends Component<
       );
     }
 
-    const zoomableViewEvent = this._getZoomableViewEventObject();
     if (this.props.staticPinPosition) {
-      const point = convertPointOnTransformSubjectToPointOnSheet({
-        pointOnTransformSubject: {
-          x: this.props.staticPinPosition.left,
-          y: this.props.staticPinPosition.top,
-        },
-        sheetImageSize: {
-          height: this.props.contentHeight,
-          width: this.props.contentWidth,
-        },
-        transformSubject: {
-          offsetX: zoomableViewEvent.offsetX,
-          offsetY: zoomableViewEvent.offsetY,
-          zoomLevel: zoomableViewEvent.zoomLevel,
-          // TODO: Make TransformSubjectData compatible with zoomableViewEvent
-          originalSize: {
-            width: zoomableViewEvent.originalWidth,
-            height: zoomableViewEvent.originalHeight,
-          },
-        },
-      });
-      this.props.onStaticPinPositionChange?.(point);
+      this._updateStaticPin();
     }
 
     this.dropPin();
@@ -862,19 +841,47 @@ class ReactNativeZoomableView extends Component<
           const tapY =
             this.props.staticPinPosition.top - this.doubleTapFirstTap.y;
 
-          Animated.timing(this.panAnim, {
-            toValue: {
-              x: this.offsetX + tapX / this.zoomLevel,
-              y: this.offsetY + tapY / this.zoomLevel,
-            },
-            useNativeDriver: true,
-            duration: 200,
-          }).start();
+          this.moveStaticPinTo({
+            x: this.offsetX + tapX / this.zoomLevel,
+            y: this.offsetY + tapY / this.zoomLevel,
+          });
         }
 
         this.props.onSingleTap?.(e, this._getZoomableViewEventObject());
       }, this.props.doubleTapDelay);
     }
+  };
+
+  moveStaticPinTo = (position: Vec2D) => {
+    Animated.timing(this.panAnim, {
+      toValue: position,
+      useNativeDriver: true,
+      duration: 200,
+    }).start(() => {
+      this._updateStaticPin();
+    });
+  };
+
+  private _updateStaticPin = () => {
+    const zoomableViewEvent = this._getZoomableViewEventObject();
+    const point = convertPointOnTransformSubjectToPointOnImage({
+      pointOnTransformSubject: {
+        x: this.props.staticPinPosition.left,
+        y: this.props.staticPinPosition.top,
+      },
+      sheetImageSize: {
+        height: this.props.contentHeight,
+        width: this.props.contentWidth,
+      },
+      transformSubject: {
+        offsetX: this.offsetX,
+        offsetY: this.offsetY,
+        zoomLevel: this.zoomLevel,
+        originalWidth: zoomableViewEvent.originalWidth,
+        originalHeight: zoomableViewEvent.originalHeight,
+      },
+    });
+    this.props.onStaticPinPositionChange(point);
   };
 
   private _addTouch(touch: TouchPoint) {

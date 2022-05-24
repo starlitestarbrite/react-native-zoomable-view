@@ -45,9 +45,8 @@ export function applyContainResizeMode(
 }
 
 export interface TransformSubjectData {
-  // TODO: Make this interface compatible with ZoomableViewEvent
-  // change originalSize to originalWidth / originalHeight
-  originalSize: Size2D;
+  originalWidth: number;
+  originalHeight: number;
   offsetX: number;
   offsetY: number;
   zoomLevel: number;
@@ -57,10 +56,8 @@ export const defaultTransformSubjectData: TransformSubjectData = {
   offsetX: 0,
   offsetY: 0,
   zoomLevel: 0,
-  originalSize: {
-    width: 0,
-    height: 0,
-  },
+  originalWidth: 0,
+  originalHeight: 0,
 };
 
 /**
@@ -76,10 +73,8 @@ function getSheetOriginOnTransformSubject(
     offsetX,
     offsetY,
     zoomLevel: scale,
-    originalSize: {
-      width: transformSubjectOriginalWidth,
-      height: transformSubjectOriginalHeight,
-    },
+    originalWidth: transformSubjectOriginalWidth,
+    originalHeight: transformSubjectOriginalHeight,
   } = transformSubject;
   return {
     x:
@@ -103,7 +98,7 @@ function getSheetOriginOnTransformSubject(
  *
  * @return {Vec2D} returns null if point is out of the sheet's bound
  */
-export function convertPointOnTransformSubjectToPointOnSheet({
+export function convertPointOnTransformSubjectToPointOnImage({
   pointOnTransformSubject,
   sheetImageSize,
   transformSubject,
@@ -113,7 +108,10 @@ export function convertPointOnTransformSubjectToPointOnSheet({
   transformSubject: TransformSubjectData;
 }): Vec2D | null {
   const { size: resizedImgSize, scale: resizedImgScale } =
-    applyContainResizeMode(sheetImageSize, transformSubject.originalSize);
+    applyContainResizeMode(sheetImageSize, {
+      width: transformSubject.originalWidth,
+      height: transformSubject.originalHeight,
+    }) || {};
 
   if (resizedImgScale == null || resizedImgSize == null) return null;
 

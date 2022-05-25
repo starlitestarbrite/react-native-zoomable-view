@@ -1,4 +1,15 @@
+import { ZoomableViewEvent } from 'lib/typescript';
 import { Size2D, Vec2D } from 'src/typings';
+
+export const defaultTransformSubjectData: ZoomableViewEvent = {
+  offsetX: 0,
+  offsetY: 0,
+  zoomLevel: 0,
+  originalWidth: 0,
+  originalHeight: 0,
+  originalPageX: 0,
+  originalPageY: 0,
+};
 
 /**
  * Assuming you have an image that's being resized to fit into a container
@@ -44,53 +55,31 @@ export function applyContainResizeMode(
   };
 }
 
-export interface TransformSubjectData {
-  originalWidth: number;
-  originalHeight: number;
-  offsetX: number;
-  offsetY: number;
-  zoomLevel: number;
-}
-
-export const defaultTransformSubjectData: TransformSubjectData = {
-  offsetX: 0,
-  offsetY: 0,
-  zoomLevel: 0,
-  originalWidth: 0,
-  originalHeight: 0,
-};
-
 /**
- * get the coord of sheet's origin relative to the transformSubject
+ * get the coord of image's origin relative to the transformSubject
  * @param resizedImageSize
  * @param transformSubject
  */
-function getSheetOriginOnTransformSubject(
+export function getImageOriginOnTransformSubject(
   resizedImageSize: Size2D,
-  transformSubject: TransformSubjectData
+  transformSubject: ZoomableViewEvent
 ) {
-  const {
-    offsetX,
-    offsetY,
-    zoomLevel: scale,
-    originalWidth: transformSubjectOriginalWidth,
-    originalHeight: transformSubjectOriginalHeight,
-  } = transformSubject;
+  const { offsetX, offsetY, zoomLevel, originalWidth, originalHeight } =
+    transformSubject;
   return {
     x:
-      offsetX * scale +
-      transformSubjectOriginalWidth / 2 -
-      (resizedImageSize.width / 2) * scale,
+      offsetX * zoomLevel +
+      originalWidth / 2 -
+      (resizedImageSize.width / 2) * zoomLevel,
     y:
-      offsetY * scale +
-      transformSubjectOriginalHeight / 2 -
-      (resizedImageSize.height / 2) * scale,
+      offsetY * zoomLevel +
+      originalHeight / 2 -
+      (resizedImageSize.height / 2) * zoomLevel,
   };
 }
 
 /**
- * Translates the coord system of a point from the transformSubject's space to the sheet's space
- * TODO: Move this into react-native-zoomable-view.
+ * Translates the coord system of a point from the viewport's space to the image's space
  *
  * @param pointOnContainer
  * @param sheetImageSize
@@ -98,44 +87,44 @@ function getSheetOriginOnTransformSubject(
  *
  * @return {Vec2D} returns null if point is out of the sheet's bound
  */
-export function convertPointOnTransformSubjectToPointOnImage({
-  pointOnTransformSubject,
-  sheetImageSize,
-  transformSubject,
+export function viewportPositionToImagePosition({
+  viewportPosition,
+  imageSize,
+  zoomableEvent,
 }: {
-  pointOnTransformSubject: Vec2D;
-  sheetImageSize: Size2D;
-  transformSubject: TransformSubjectData;
+  viewportPosition: Vec2D;
+  imageSize: Size2D;
+  zoomableEvent: ZoomableViewEvent;
 }): Vec2D | null {
   const { size: resizedImgSize, scale: resizedImgScale } =
-    applyContainResizeMode(sheetImageSize, {
-      width: transformSubject.originalWidth,
-      height: transformSubject.originalHeight,
+    applyContainResizeMode(imageSize, {
+      width: zoomableEvent.originalWidth,
+      height: zoomableEvent.originalHeight,
     }) || {};
 
   if (resizedImgScale == null || resizedImgSize == null) return null;
 
-  const sheetOriginOnContainer = getSheetOriginOnTransformSubject(
+  const sheetOriginOnContainer = getImageOriginOnTransformSubject(
     resizedImgSize,
-    transformSubject
+    zoomableEvent
   );
 
   const pointOnSheet = {
     x:
-      (pointOnTransformSubject.x - sheetOriginOnContainer.x) /
-      transformSubject.zoomLevel /
+      (viewportPosition.x - sheetOriginOnContainer.x) /
+      zoomableEvent.zoomLevel /
       resizedImgScale,
     y:
-      (pointOnTransformSubject.y - sheetOriginOnContainer.y) /
-      transformSubject.zoomLevel /
+      (viewportPosition.y - sheetOriginOnContainer.y) /
+      zoomableEvent.zoomLevel /
       resizedImgScale,
   };
 
   if (
     pointOnSheet.x < 0 ||
-    pointOnSheet.x > sheetImageSize.width ||
+    pointOnSheet.x > imageSize.width ||
     pointOnSheet.y < 0 ||
-    pointOnSheet.y > sheetImageSize.height
+    pointOnSheet.y > imageSize.height
   )
     return null;
 

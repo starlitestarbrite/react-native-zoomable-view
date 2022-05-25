@@ -27,7 +27,7 @@ import {
   calcNewScaledOffsetForZoomCentering,
 } from './helper';
 import { applyPanBoundariesToOffset } from './helper/applyPanBoundariesToOffset';
-import { convertPointOnTransformSubjectToPointOnImage } from './helper/coordinateConversion';
+import { viewportPositionToImagePosition } from './helper/coordinateConversion';
 import {
   getBoundaryCrossedAnim,
   getPanMomentumDecayAnim,
@@ -863,22 +863,20 @@ class ReactNativeZoomableView extends Component<
   };
 
   private _updateStaticPin = () => {
-    const zoomableViewEvent = this._getZoomableViewEventObject();
-    const point = convertPointOnTransformSubjectToPointOnImage({
-      pointOnTransformSubject: {
+    const point = viewportPositionToImagePosition({
+      viewportPosition: {
         x: this.props.staticPinPosition.left,
         y: this.props.staticPinPosition.top,
       },
-      sheetImageSize: {
+      imageSize: {
         height: this.props.contentHeight,
         width: this.props.contentWidth,
       },
-      transformSubject: {
+      zoomableEvent: {
+        ...this._getZoomableViewEventObject(),
         offsetX: this.offsetX,
         offsetY: this.offsetY,
         zoomLevel: this.zoomLevel,
-        originalWidth: zoomableViewEvent.originalWidth,
-        originalHeight: zoomableViewEvent.originalHeight,
       },
     });
     this.props.onStaticPinPositionChange(point);

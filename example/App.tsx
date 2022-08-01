@@ -32,9 +32,7 @@ export default function App() {
           }
           // Callback that returns the position of the pin
           // on the actual source image
-          onStaticPinPositionChange={(position) => {
-            debouncedUpdatePin(position);
-          }}
+          onStaticPinPositionChange={debouncedUpdatePin}
           maxZoom={30}
           initialZoom={1.5}
           // Give these to the zoomable view so it can apply the boundaries around the actual content.

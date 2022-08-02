@@ -73,6 +73,7 @@ class ReactNativeZoomableView extends Component<
     staticPinIcon: undefined,
     onStaticPinPositionChange: undefined,
     animatePin: true,
+    disableMomentum: false,
   };
 
   private panAnim = new Animated.ValueXY({ x: 0, y: 0 });
@@ -450,10 +451,12 @@ class ReactNativeZoomableView extends Component<
 
     this.lastGestureCenterPosition = null;
 
-    getPanMomentumDecayAnim(this.panAnim, {
-      x: gestureState.vx / this.zoomLevel,
-      y: gestureState.vy / this.zoomLevel,
-    }).start();
+    if (!this.props.disableMomentum) {
+      getPanMomentumDecayAnim(this.panAnim, {
+        x: gestureState.vx / this.zoomLevel,
+        y: gestureState.vy / this.zoomLevel,
+      }).start();
+    }
 
     if (this.longPressTimeout) {
       clearTimeout(this.longPressTimeout);

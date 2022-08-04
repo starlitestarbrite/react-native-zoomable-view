@@ -72,6 +72,7 @@ class ReactNativeZoomableView extends Component<
     staticPinPosition: undefined,
     staticPinIcon: undefined,
     onStaticPinPositionChange: undefined,
+    onStaticPinPositionMove: undefined,
     animatePin: true,
     disableMomentum: false,
   };
@@ -316,6 +317,8 @@ class ReactNativeZoomableView extends Component<
       return { successful: false };
 
     this.props.onTransform?.(zoomableViewEvent);
+
+    this.props.onStaticPinPositionMove?.(this._staticPinPosition());
 
     return { successful: true };
   }
@@ -865,8 +868,8 @@ class ReactNativeZoomableView extends Component<
     });
   };
 
-  private _updateStaticPin = () => {
-    const point = viewportPositionToImagePosition({
+  private _staticPinPosition = () => {
+    return viewportPositionToImagePosition({
       viewportPosition: {
         x: this.props.staticPinPosition.left,
         y: this.props.staticPinPosition.top,
@@ -882,7 +885,10 @@ class ReactNativeZoomableView extends Component<
         zoomLevel: this.zoomLevel,
       },
     });
-    this.props.onStaticPinPositionChange(point);
+  };
+
+  private _updateStaticPin = () => {
+    this.props.onStaticPinPositionChange?.(this._staticPinPosition());
   };
 
   private _addTouch(touch: TouchPoint) {

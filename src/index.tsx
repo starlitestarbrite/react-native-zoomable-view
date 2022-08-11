@@ -2,7 +2,7 @@ import {
   applyContainResizeMode,
   getImageOriginOnTransformSubject,
   viewportPositionToImagePosition,
-} from 'src/helper/coordinateConversion';
+} from './helper/coordinateConversion';
 import ReactNativeZoomableView from './ReactNativeZoomableView';
 import ReactNativeZoomableViewWithGestures from './ReactNativeZoomableViewWithGestures';
 import { ReactNativeZoomableViewProps, ZoomableViewEvent } from './typings';

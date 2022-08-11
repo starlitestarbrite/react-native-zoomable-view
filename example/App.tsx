@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import { View, Text, Image, Animated, Button } from 'react-native';
 // @ts-ignore
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
-import { debounce } from 'lodash';
 import { styles } from './style';
 
 export default function App() {
@@ -75,4 +74,17 @@ export default function App() {
       />
     </View>
   );
+}
+
+function debounce(func, wait, immediate = false) {
+  var timeout;
+  return function () {
+    var args = arguments;
+    clearTimeout(timeout);
+    timeout = setTimeout(function () {
+      timeout = null;
+      if (!immediate) func.apply(this, args);
+    }, wait);
+    if (immediate && !timeout) func.apply(this, args);
+  };
 }

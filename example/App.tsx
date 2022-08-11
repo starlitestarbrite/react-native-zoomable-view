@@ -9,12 +9,16 @@ export default function App() {
   const zoomAnimatedValue = useRef(new Animated.Value(1)).current;
   const scale = Animated.divide(1, zoomAnimatedValue);
   const [showMarkers, setShowMarkers] = useState(true);
-  const [size, setSize] = useState({ width: 0, height: 0 });
+  const [size, setSize] = useState<{ width: number; height: number }>();
 
   // Use layout event to get centre point, to set the pin
   const [pin, setPin] = useState({ x: 0, y: 0 });
   // Debounce the change event to avoid layout event firing too often while dragging
   const debouncedUpdatePin = debounce(setPin, 100);
+
+  const staticPinPosition = size
+    ? { left: size.width / 2, top: size.height / 2 }
+    : undefined;
 
   return (
     <View style={styles.container}>
@@ -22,14 +26,7 @@ export default function App() {
       <View style={styles.box} onLayout={(e) => setSize(e.nativeEvent.layout)}>
         <ReactNativeZoomableView
           // Where to put the pin in the content view
-          staticPinPosition={
-            size.width && size.height
-              ? {
-                  left: size.width / 2,
-                  top: size.height / 2,
-                }
-              : undefined
-          }
+          staticPinPosition={staticPinPosition}
           // Callback that returns the position of the pin
           // on the actual source image
           onStaticPinPositionChange={debouncedUpdatePin}

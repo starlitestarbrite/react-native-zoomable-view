@@ -13,7 +13,7 @@ export default function App() {
   // Use layout event to get centre point, to set the pin
   const [pin, setPin] = useState({ x: 0, y: 0 });
   // Debounce the change event to avoid layout event firing too often while dragging
-  const debouncedUpdatePin = debounce(setPin, 100);
+  const debouncedUpdatePin = debounce(setPin, 10);
 
   const staticPinPosition = size
     ? { left: size.width / 2, top: size.height / 2 }
@@ -28,23 +28,23 @@ export default function App() {
           staticPinPosition={staticPinPosition}
           // Callback that returns the position of the pin
           // on the actual source image
+          disableMomentum
           onStaticPinPositionChange={debouncedUpdatePin}
+          onStaticPinPositionMove={debouncedUpdatePin}
           maxZoom={30}
           initialZoom={1.5}
           // Give these to the zoomable view so it can apply the boundaries around the actual content.
           // Need to make sure the content is actually centered and the width and height are
           // measured when it's rendered naturally. Not the intrinsic sizes.
-          // For example, an image with an intrinsic size of 400x200 will be rendered as 300x150 in this case.
-          // Therefore, we'll feed the zoomable view the 300x100 size.
-          contentWidth={300}
-          contentHeight={150}
+          contentWidth={400}
+          contentHeight={400}
           panBoundaryPadding={500}
           zoomAnimatedValue={zoomAnimatedValue}
         >
           <View style={styles.contents}>
             <Image
               style={styles.img}
-              source={{ uri: 'https://placekitten.com/400/200' }}
+              source={{ uri: 'https://placekitten.com/400/400' }}
             />
 
             {showMarkers &&

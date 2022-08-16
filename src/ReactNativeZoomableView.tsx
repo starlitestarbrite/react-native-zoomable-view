@@ -640,10 +640,19 @@ class ReactNativeZoomableView extends Component<
 
     const gestureCenterPoint = calcGestureCenterPoint(e, gestureState);
 
-    const zoomCenter = {
+    let zoomCenter = {
       x: gestureCenterPoint.x - this.state.originalPageX,
       y: gestureCenterPoint.y - this.state.originalPageY,
     };
+
+    if (this.props.staticPinPosition) {
+      // When we use a static pin position, the zoom centre is the same as that position,
+      // otherwise the pin moves around way too much while zooming.
+      zoomCenter = {
+        x: this.props.staticPinPosition.left,
+        y: this.props.staticPinPosition.top,
+      };
+    }
 
     // Uncomment to debug
     this.props.debug && this._setPinchDebugPoints(e, zoomCenter);

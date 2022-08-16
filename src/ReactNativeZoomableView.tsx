@@ -275,9 +275,8 @@ class ReactNativeZoomableView extends Component<
       currState.originalPageY !== prevState.originalPageY;
 
     const staticPinPositionChanged =
-      prevProps.staticPinPosition?.left !==
-        this.props.staticPinPosition?.left ||
-      prevProps.staticPinPosition?.top !== this.props.staticPinPosition?.top;
+      prevProps.staticPinPosition?.x !== this.props.staticPinPosition?.x ||
+      prevProps.staticPinPosition?.y !== this.props.staticPinPosition?.y;
 
     if (
       this.onTransformInvocationInitialized &&

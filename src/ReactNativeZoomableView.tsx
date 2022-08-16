@@ -649,8 +649,8 @@ class ReactNativeZoomableView extends Component<
       // When we use a static pin position, the zoom centre is the same as that position,
       // otherwise the pin moves around way too much while zooming.
       zoomCenter = {
-        x: this.props.staticPinPosition.left,
-        y: this.props.staticPinPosition.top,
+        x: this.props.staticPinPosition.x,
+        y: this.props.staticPinPosition.y,
       };
     }
 
@@ -679,11 +679,13 @@ class ReactNativeZoomableView extends Component<
       zoomCenter.x
     );
 
-    const offsetShift =
-      this._calcOffsetShiftSinceLastGestureState(gestureCenterPoint);
-    if (offsetShift) {
-      offsetX += offsetShift.x;
-      offsetY += offsetShift.y;
+    if (this.props.staticPinPosition) {
+      const offsetShift =
+        this._calcOffsetShiftSinceLastGestureState(gestureCenterPoint);
+      if (offsetShift) {
+        offsetX += offsetShift.x;
+        offsetY += offsetShift.y;
+      }
     }
 
     this.offsetX = offsetX;
@@ -852,9 +854,9 @@ class ReactNativeZoomableView extends Component<
         // Pan to the tapped location
         if (this.props.staticPinPosition) {
           const tapX =
-            this.props.staticPinPosition.left - this.doubleTapFirstTap.x;
+            this.props.staticPinPosition.x - this.doubleTapFirstTap.x;
           const tapY =
-            this.props.staticPinPosition.top - this.doubleTapFirstTap.y;
+            this.props.staticPinPosition.y - this.doubleTapFirstTap.y;
 
           this.moveStaticPinTo({
             x: this.offsetX + tapX / this.zoomLevel,
@@ -880,8 +882,8 @@ class ReactNativeZoomableView extends Component<
   private _staticPinPosition = () => {
     return viewportPositionToImagePosition({
       viewportPosition: {
-        x: this.props.staticPinPosition.left,
-        y: this.props.staticPinPosition.top,
+        x: this.props.staticPinPosition.x,
+        y: this.props.staticPinPosition.y,
       },
       imageSize: {
         height: this.props.contentHeight,
@@ -1151,7 +1153,10 @@ class ReactNativeZoomableView extends Component<
         {staticPinPosition && (
           <Animated.View
             style={[
-              staticPinPosition,
+              staticPinPosition && {
+                left: staticPinPosition.x,
+                top: staticPinPosition.y,
+              },
               styles.pinWrapper,
               // eslint-disable-next-line react-native/no-inline-styles
               {

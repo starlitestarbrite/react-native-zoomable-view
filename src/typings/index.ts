@@ -132,10 +132,7 @@ export interface ReactNativeZoomableViewProps extends ViewProps {
     zoomableViewEventObject: ZoomableViewEvent
   ) => boolean;
 
-  staticPinPosition?: {
-    left: number;
-    top: number;
-  };
+  staticPinPosition?: Vec2D;
   staticPinIcon?: React.ReactElement;
   onStaticPinPositionChange?: (position: Vec2D) => void;
   onStaticPinPositionMove?: (position: Vec2D) => void;

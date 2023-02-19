@@ -1,5 +1,5 @@
 import { GestureResponderEvent, PanResponderGestureState } from 'react-native';
-import { Vec2D } from 'src/typings';
+import { Vec2D } from '../typings';
 
 export { calcNewScaledOffsetForZoomCentering } from './calcNewScaledOffsetForZoomCentering';
 

@@ -8,7 +8,6 @@ import {
   PanResponderGestureState,
   StyleSheet,
   View,
-  Image,
 } from 'react-native';
 
 import {
@@ -17,6 +16,7 @@ import {
   ReactNativeZoomableViewState,
   TouchPoint,
   ZoomableViewEvent,
+  Size2D,
 } from './typings';
 
 import { AnimatedTouchFeedback } from './components';
@@ -28,6 +28,8 @@ import {
 } from './helper';
 import { applyPanBoundariesToOffset } from './helper/applyPanBoundariesToOffset';
 import { viewportPositionToImagePosition } from './helper/coordinateConversion';
+import { StaticPin } from './components/StaticPin';
+import { debounce } from 'lodash';
 import {
   getBoundaryCrossedAnim,
   getPanMomentumDecayAnim,
@@ -305,6 +307,11 @@ class ReactNativeZoomableView extends Component<
     clearInterval(this.measureZoomSubjectInterval);
   }
 
+  debouncedOnStaticPinPositionChange = debounce(
+    this.props.onStaticPinPositionChange,
+    100
+  );
+
   /**
    * try to invoke onTransform
    * @private
@@ -318,6 +325,8 @@ class ReactNativeZoomableView extends Component<
     this.props.onTransform?.(zoomableViewEvent);
 
     this.props.onStaticPinPositionMove?.(this._staticPinPosition());
+
+    this.debouncedOnStaticPinPositionChange?.(this._staticPinPosition());
 
     return { successful: true };
   }
@@ -1165,41 +1174,13 @@ class ReactNativeZoomableView extends Component<
         })}
 
         {staticPinPosition && (
-          <Animated.View
-            style={[
-              staticPinPosition && {
-                left: staticPinPosition.x,
-                top: staticPinPosition.y,
-              },
-              styles.pinWrapper,
-              // eslint-disable-next-line react-native/no-inline-styles
-              {
-                opacity: pinSize.width && pinSize.height ? 1 : 0,
-                transform: [
-                  {
-                    translateY: -pinSize.height,
-                  },
-                  {
-                    translateX: -pinSize.width / 2,
-                  },
-                  ...this.pinAnim.getTranslateTransform(),
-                ],
-              },
-            ]}
-          >
-            <View
-              onLayout={({ nativeEvent: { layout } }) => {
-                this.setState({ pinSize: layout });
-              }}
-            >
-              {staticPinIcon || (
-                <Image
-                  source={require('./assets/pin.png')}
-                  style={styles.pin}
-                />
-              )}
-            </View>
-          </Animated.View>
+          <StaticPin
+            staticPinIcon={staticPinIcon}
+            staticPinPosition={staticPinPosition}
+            pinSize={pinSize}
+            pinAnim={this.pinAnim}
+            setPinSize={(size: Size2D) => this.setState({ pinSize: size })}
+          />
         )}
       </View>
     );
@@ -1219,13 +1200,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
     overflow: 'hidden',
-  },
-  pinWrapper: {
-    position: 'absolute',
-  },
-  pin: {
-    width: 48,
-    height: 64,
   },
 });
 

@@ -153,7 +153,7 @@ These options can be used to limit and change the zoom behavior.
 | initialZoom                | number  | Initial zoom level on startup                                                                                                                                                                                                                                                                                                        | 1.0       |
 | maxZoom                    | number  | Maximum possible zoom level (zoom in). Can be set to `null` to allow unlimited zooming                                                                                                                                                                                                                                               | 1.5       |
 | minZoom                    | number  | Minimum possible zoom level (zoom out)                                                                                                                                                                                                                                                                                               | 0.5       |
-| disablePanOnInitialZoom    | boolean  | If true, panning is disabled when zoom level is equal to the initial zoom level                                                                                                                                                                                                                                                                                   | false     |
+| disablePanOnInitialZoom    | boolean | If true, panning is disabled when zoom level is equal to the initial zoom level                                                                                                                                                                                                                                                      | false     |
 | doubleTapDelay             | number  | How much delay will still be recognized as double press (ms)                                                                                                                                                                                                                                                                         | 300       |
 | doubleTapZoomToCenter      | boolean | If true, double tapping will always zoom to center of View instead of the direction it was double tapped in                                                                                                                                                                                                                          |
 | bindToBorders              | boolean | If true, it makes sure the object stays within box borders                                                                                                                                                                                                                                                                           | true      |
@@ -168,6 +168,18 @@ These options can be used to limit and change the zoom behavior.
 | panBoundaryPadding         | number  | At certain scales, the edge of the content is bounded too close to the edge of the container, making it difficult to pan to and interact with the edge of the content. To fix this, we'd wanna allow the content to pan just a little further away from the container's edge. Hence, the "pan boundary padding", measured in pixels. | 0         |
 | longPressDuration          | number  | Duration in ms until a press is considered a long press                                                                                                                                                                                                                                                                              | 700       |
 | visualTouchFeedbackEnabled | boolean | Whether to show a touch feedback circle on touch                                                                                                                                                                                                                                                                                     | true      |
+
+#### Static Pin Position
+
+These optional props can be used to keep a "static" pin in the centre of the screen and move the map underneath it. This is very useful for maps.
+
+| name                      | type                      | description                                               |
+| ------------------------- | ------------------------- | --------------------------------------------------------- |
+| staticPinPosition         | Vec2D                     | Where in the viewport to put the pin                      |
+| staticPinIcon             | Element                   | The pin icon itself                                       |
+| onStaticPinPositionChange | (position: Vec2D) => void | Callback every time the pin is at rest                    |
+| onStaticPinPositionMove   | (position: Vec2D) => void | Callback live while the pin is moving                     |
+| animatePin                | boolean                   | Whether to make the pin bounce up and down while dragging |
 
 #### Callbacks
 

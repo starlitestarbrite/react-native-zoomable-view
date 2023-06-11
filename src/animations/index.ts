@@ -1,5 +1,5 @@
 import { Animated, Easing } from 'react-native';
-import { Vec2D } from 'src/typings';
+import { Vec2D } from '../typings';
 
 export function getBoundaryCrossedAnim(
   animValue: Animated.Value,

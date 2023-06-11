@@ -307,10 +307,9 @@ class ReactNativeZoomableView extends Component<
     clearInterval(this.measureZoomSubjectInterval);
   }
 
-  debouncedOnStaticPinPositionChange = debounce(
-    this.props.onStaticPinPositionChange,
-    100
-  );
+  debouncedOnStaticPinPositionChange = this.props.onStaticPinPositionChange
+    ? debounce(this.props.onStaticPinPositionChange, 100)
+    : undefined;
 
   /**
    * try to invoke onTransform

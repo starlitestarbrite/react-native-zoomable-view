@@ -453,12 +453,12 @@ class ReactNativeZoomableView extends Component<
 
     this.lastGestureCenterPosition = null;
 
-    const disableMomentum = this.props.disableMomentum || (
-      this.gestureType === 'shift' &&
-      this.props.disablePanOnInitialZoom &&
-      this.zoomLevel === this.props.initialZoom
-    );
-    
+    const disableMomentum =
+      this.props.disableMomentum ||
+      (this.gestureType === 'shift' &&
+        this.props.disablePanOnInitialZoom &&
+        this.zoomLevel === this.props.initialZoom);
+
     // Trigger final shift animation unless disablePanOnInitialZoom is set and we're on the initial zoom level
     // or disableMomentum
     if (!disableMomentum) {
@@ -649,7 +649,7 @@ class ReactNativeZoomableView extends Component<
 
     if (!gestureCenterPoint) return;
 
-    const zoomCenter = {
+    let zoomCenter = {
       x: gestureCenterPoint.x - this.state.originalPageX,
       y: gestureCenterPoint.y - this.state.originalPageY,
     };
@@ -688,13 +688,11 @@ class ReactNativeZoomableView extends Component<
       zoomCenter.x
     );
 
-    if (this.props.staticPinPosition) {
-      const offsetShift =
-        this._calcOffsetShiftSinceLastGestureState(gestureCenterPoint);
-      if (offsetShift) {
-        offsetX += offsetShift.x;
-        offsetY += offsetShift.y;
-      }
+    const offsetShift =
+      this._calcOffsetShiftSinceLastGestureState(gestureCenterPoint);
+    if (offsetShift) {
+      offsetX += offsetShift.x;
+      offsetY += offsetShift.y;
     }
 
     this.offsetX = offsetX;

@@ -16,7 +16,7 @@ export default function App() {
   const debouncedUpdatePin = debounce(setPin, 10);
 
   const staticPinPosition = size
-    ? { left: size.width / 2, top: size.height / 2 }
+    ? { x: size.width / 2, y: size.height / 2 }
     : undefined;
 
   return (
@@ -24,11 +24,11 @@ export default function App() {
       <Text>ReactNativeZoomableView</Text>
       <View style={styles.box} onLayout={(e) => setSize(e.nativeEvent.layout)}>
         <ReactNativeZoomableView
+          disableMomentum
           // Where to put the pin in the content view
           staticPinPosition={staticPinPosition}
           // Callback that returns the position of the pin
           // on the actual source image
-          disableMomentum
           onStaticPinPositionChange={debouncedUpdatePin}
           onStaticPinPositionMove={debouncedUpdatePin}
           maxZoom={30}

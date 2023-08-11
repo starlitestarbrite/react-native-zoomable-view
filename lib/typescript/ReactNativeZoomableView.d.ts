@@ -24,9 +24,16 @@ declare class ReactNativeZoomableView extends Component<ReactNativeZoomableViewP
         contentHeight: any;
         panBoundaryPadding: number;
         visualTouchFeedbackEnabled: boolean;
+        staticPinPosition: any;
+        staticPinIcon: any;
+        onStaticPinPositionChange: any;
+        onStaticPinPositionMove: any;
+        animatePin: boolean;
+        disablePanOnInitialZoom: boolean;
     };
     private panAnim;
     private zoomAnim;
+    private pinAnim;
     private __offsets;
     private zoomLevel;
     private lastGestureCenterPosition;
@@ -44,6 +51,8 @@ declare class ReactNativeZoomableView extends Component<ReactNativeZoomableViewP
     private doubleTapFirstTap;
     private measureZoomSubjectInterval;
     constructor(props: any);
+    private raisePin;
+    private dropPin;
     private set offsetX(value);
     private set offsetY(value);
     private get offsetX();
@@ -53,6 +62,7 @@ declare class ReactNativeZoomableView extends Component<ReactNativeZoomableViewP
     componentDidUpdate(prevProps: ReactNativeZoomableViewProps, prevState: ReactNativeZoomableViewState): void;
     componentDidMount(): void;
     componentWillUnmount(): void;
+    debouncedOnStaticPinPositionChange: any;
     /**
      * try to invoke onTransform
      * @private
@@ -159,6 +169,9 @@ declare class ReactNativeZoomableView extends Component<ReactNativeZoomableViewP
      * @private
      */
     private _resolveAndHandleTap;
+    moveStaticPinTo: (position: Vec2D) => void;
+    private _staticPinPosition;
+    private _updateStaticPin;
     private _addTouch;
     private _removeTouch;
     /**

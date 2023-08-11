@@ -1,3 +1,4 @@
+/// <reference types="react" />
 import { Animated, GestureResponderEvent, PanResponderGestureState, ViewProps } from 'react-native';
 export declare enum SwipeDirection {
     SWIPE_UP = "SWIPE_UP",
@@ -33,6 +34,7 @@ export interface ReactNativeZoomableViewProps extends ViewProps {
     movementSensibility?: number;
     longPressDuration?: number;
     visualTouchFeedbackEnabled?: boolean;
+    disablePanOnInitialZoom?: boolean;
     style?: any;
     zoomAnimatedValue?: Animated.Value;
     panAnimatedValueXY?: Animated.ValueXY;
@@ -54,10 +56,20 @@ export interface ReactNativeZoomableViewProps extends ViewProps {
     onPanResponderMove?: (event: GestureResponderEvent, gestureState: PanResponderGestureState, zoomableViewEventObject: ZoomableViewEvent) => boolean;
     onPanResponderTerminate?: (event: GestureResponderEvent, gestureState: PanResponderGestureState, zoomableViewEventObject: ZoomableViewEvent) => void;
     onPanResponderTerminationRequest?: (event: GestureResponderEvent, gestureState: PanResponderGestureState, zoomableViewEventObject: ZoomableViewEvent) => boolean;
+    staticPinPosition?: Vec2D;
+    staticPinIcon?: React.ReactElement;
+    onStaticPinPositionChange?: (position: Vec2D) => void;
+    onStaticPinPositionMove?: (position: Vec2D) => void;
+    animatePin: boolean;
+    disableMomentum?: boolean;
 }
 export interface Vec2D {
     x: number;
     y: number;
+}
+export interface Size2D {
+    width: number;
+    height: number;
 }
 export interface TouchPoint extends Vec2D {
     id: string;
@@ -70,6 +82,7 @@ export interface ReactNativeZoomableViewState {
     originalPageX: number;
     originalPageY: number;
     debugPoints: undefined | Vec2D[];
+    pinSize: Size2D;
 }
 export interface ReactNativeZoomableViewWithGesturesProps extends ReactNativeZoomableViewProps {
     swipeLengthThreshold?: number;

@@ -1,6 +1,6 @@
 {
   "name": "@openspacelabs/react-native-zoomable-view",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A view component for react-native with pinch to zoom, tap to move and double tap to zoom capability.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -25,7 +25,6 @@
     "test": "jest",
     "typescript": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "prepare": "bob build",
     "release": "release-it",
     "example": "yarn --cwd example",
     "pods": "cd example && pod-install --quiet",
@@ -97,7 +96,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint && yarn typescript"
+      "pre-commit": "yarn lint && yarn typescript && bob build && git add lib"
     }
   },
   "commitlint": {

@@ -874,7 +874,7 @@ class ReactNativeZoomableView extends Component<
         delete this.singleTapTimeoutId;
 
         // Pan to the tapped location
-        if (this.props.staticPinPosition) {
+        if (this.props.staticPinPosition && this.doubleTapFirstTap) {
           const tapX =
             this.props.staticPinPosition.x - this.doubleTapFirstTap.x;
           const tapY =

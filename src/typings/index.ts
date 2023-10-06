@@ -132,6 +132,11 @@ export interface ReactNativeZoomableViewProps extends ViewProps {
     gestureState: PanResponderGestureState,
     zoomableViewEventObject: ZoomableViewEvent
   ) => boolean;
+  onShouldBlockNativeResponder?: (
+    event: GestureResponderEvent,
+    gestureState: PanResponderGestureState,
+    zoomableViewEventObject: ZoomableViewEvent
+  ) => boolean;
 }
 
 export interface Vec2D {

@@ -139,7 +139,12 @@ class ReactNativeZoomableView extends Component<
           gestureState,
           this._getZoomableViewEventObject()
         ),
-      onShouldBlockNativeResponder: () => false,
+      onShouldBlockNativeResponder: (evt, gestureState) =>
+        !!this.props.onShouldBlockNativeResponder?.(
+          evt,
+          gestureState,
+          this._getZoomableViewEventObject()
+        ),
     });
 
     this.zoomSubjectWrapperRef = createRef<View>();

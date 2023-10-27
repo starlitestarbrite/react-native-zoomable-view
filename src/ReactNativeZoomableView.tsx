@@ -127,8 +127,9 @@ class ReactNativeZoomableView extends Component<
           gestureState,
           this._getZoomableViewEventObject()
         ),
+      // Defaults to true to prevent parent components, such as React Navigation's tab view, from taking over as responder.
       onShouldBlockNativeResponder: (evt, gestureState) =>
-        !!this.props.onShouldBlockNativeResponder?.(
+        this.props.onShouldBlockNativeResponder?.(
           evt,
           gestureState,
           this._getZoomableViewEventObject()

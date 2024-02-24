@@ -27,7 +27,10 @@ import {
   calcNewScaledOffsetForZoomCentering,
 } from './helper';
 import { applyPanBoundariesToOffset } from './helper/applyPanBoundariesToOffset';
-import { viewportPositionToImagePosition } from './helper/coordinateConversion';
+import {
+  applyContainResizeMode,
+  viewportPositionToImagePosition,
+} from './helper/coordinateConversion';
 import { StaticPin } from './components/StaticPin';
 import { debounce } from 'lodash';
 import {
@@ -903,11 +906,25 @@ class ReactNativeZoomableView extends Component<
   };
 
   moveStaticPinTo = (position: Vec2D) => {
+    const zoomableEvent = this._getZoomableViewEventObject();
+    const imageSize = {
+      height: this.props.contentHeight,
+      width: this.props.contentWidth,
+    };
+
+    const { scale } =
+      applyContainResizeMode(imageSize, {
+        width: zoomableEvent.originalWidth,
+        height: zoomableEvent.originalHeight,
+      }) || {};
+
+    const toValue = {
+      x: this.props.staticPinPosition.x - position.x * scale,
+      y: this.props.staticPinPosition.y - position.y * scale,
+    };
+
     Animated.timing(this.panAnim, {
-      toValue: {
-        x: this.props.staticPinPosition.x - position.x / this.zoomLevel,
-        y: this.props.staticPinPosition.y - position.y / this.zoomLevel,
-      },
+      toValue,
       useNativeDriver: true,
       duration: 200,
     }).start(() => {

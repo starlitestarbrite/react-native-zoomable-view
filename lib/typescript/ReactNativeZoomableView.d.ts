@@ -244,3 +244,4 @@ declare class ReactNativeZoomableView extends Component<ReactNativeZoomableViewP
     render(): JSX.Element;
 }
 export default ReactNativeZoomableView;
+export { ReactNativeZoomableView };

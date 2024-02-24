@@ -885,9 +885,15 @@ class ReactNativeZoomableView extends Component<
           const tapY =
             this.props.staticPinPosition.y - this.doubleTapFirstTap.y;
 
-          this.moveStaticPinTo({
-            x: this.offsetX + tapX / this.zoomLevel,
-            y: this.offsetY + tapY / this.zoomLevel,
+          Animated.timing(this.panAnim, {
+            toValue: {
+              x: this.offsetX + tapX / this.zoomLevel,
+              y: this.offsetY + tapY / this.zoomLevel,
+            },
+            useNativeDriver: true,
+            duration: 200,
+          }).start(() => {
+            this._updateStaticPin();
           });
         }
 
@@ -898,7 +904,10 @@ class ReactNativeZoomableView extends Component<
 
   moveStaticPinTo = (position: Vec2D) => {
     Animated.timing(this.panAnim, {
-      toValue: position,
+      toValue: {
+        x: this.props.staticPinPosition.x - position.x / this.zoomLevel,
+        y: this.props.staticPinPosition.y - position.y / this.zoomLevel,
+      },
       useNativeDriver: true,
       duration: 200,
     }).start(() => {
@@ -1208,3 +1217,5 @@ const styles = StyleSheet.create({
 });
 
 export default ReactNativeZoomableView;
+
+export { ReactNativeZoomableView };

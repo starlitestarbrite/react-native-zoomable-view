@@ -421,9 +421,9 @@ class ReactNativeZoomableView extends Component<
 
     // Trigger final shift animation unless panEnabled is false or disablePanOnInitialZoom is true and we're on the initial zoom level
     if (
+      this.props.panEnabled &&
       !(
         this.gestureType === 'shift' &&
-        this.props.panEnabled &&
         this.props.disablePanOnInitialZoom &&
         this.zoomLevel === this.props.initialZoom
       )

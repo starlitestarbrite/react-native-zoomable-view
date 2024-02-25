@@ -3,7 +3,6 @@ import {
   Animated,
   Easing,
   GestureResponderEvent,
-  InteractionManager,
   PanResponder,
   PanResponderGestureState,
   StyleSheet,
@@ -362,7 +361,7 @@ class ReactNativeZoomableView extends Component<
    */
   private grabZoomSubjectOriginalMeasurements = () => {
     // make sure we measure after animations are complete
-    InteractionManager.runAfterInteractions(() => {
+    requestAnimationFrame(() => {
       // this setTimeout is here to fix a weird issue on iOS where the measurements are all `0`
       // when navigating back (react-navigation stack) from another view
       // while closing the keyboard at the same time
@@ -376,6 +375,7 @@ class ReactNativeZoomableView extends Component<
         // we don't wanna measure when zoomSubjectWrapperRef is not yet available or has been unmounted
         zoomSubjectWrapperRef.current?.measureInWindow(
           (x, y, width, height) => {
+            console.log({ width, height });
             this.setState({
               originalWidth: width,
               originalHeight: height,
@@ -902,27 +902,19 @@ class ReactNativeZoomableView extends Component<
     }
   };
 
+  _moveTimeout: NodeJS.Timeout;
   moveStaticPinTo = (position: Vec2D) => {
-    const z = this._getZoomableViewEventObject();
+    const { originalWidth, originalHeight } = this.state;
+    const { staticPinPosition, contentWidth, contentHeight } = this.props;
 
-    const centreX = z.originalWidth / 2;
-    const centreY = z.originalHeight / 2;
+    // Offset for the static pin
+    const pinX = staticPinPosition.x - originalWidth / 2;
+    const pinY = staticPinPosition.y - originalHeight / 2;
 
-    const offsetX = this.props.staticPinPosition.x - centreX;
-    const offsetY = this.props.staticPinPosition.y - centreY;
+    this.offsetX = contentWidth / 2 - position.x + pinX / this.zoomLevel;
+    this.offsetY = contentHeight / 2 - position.y + pinY / this.zoomLevel;
 
-    const toValue = {
-      x: z.originalWidth / 2 - position.x + offsetX / z.zoomLevel,
-      y: z.originalHeight / 2 - position.y + offsetY / z.zoomLevel,
-    };
-
-    Animated.timing(this.panAnim, {
-      toValue,
-      useNativeDriver: true,
-      duration: 200,
-    }).start(() => {
-      this._updateStaticPin();
-    });
+    this.panAnim.setValue({ x: this.offsetX, y: this.offsetY });
   };
 
   private _staticPinPosition = () => {

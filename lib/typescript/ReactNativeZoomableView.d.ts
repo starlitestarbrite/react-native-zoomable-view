@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Component, RefObject } from 'react';
 import { GestureResponderEvent, PanResponderGestureState, View } from 'react-native';
 import { Vec2D, ReactNativeZoomableViewProps, ReactNativeZoomableViewState, ZoomableViewEvent } from './typings';
@@ -169,6 +170,7 @@ declare class ReactNativeZoomableView extends Component<ReactNativeZoomableViewP
      * @private
      */
     private _resolveAndHandleTap;
+    _moveTimeout: NodeJS.Timeout;
     moveStaticPinTo: (position: Vec2D) => void;
     private _staticPinPosition;
     private _updateStaticPin;

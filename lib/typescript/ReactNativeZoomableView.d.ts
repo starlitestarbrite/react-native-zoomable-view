@@ -8,6 +8,7 @@ declare class ReactNativeZoomableView extends Component<ReactNativeZoomableViewP
     doubleTapFirstTapReleaseTimestamp: number;
     static defaultProps: {
         zoomEnabled: boolean;
+        panEnabled: boolean;
         initialZoom: number;
         initialOffsetX: number;
         initialOffsetY: number;

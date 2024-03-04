@@ -53,6 +53,7 @@ class ReactNativeZoomableView extends Component<
 
   static defaultProps = {
     zoomEnabled: true,
+    panEnabled: true,
     initialZoom: 1,
     initialOffsetX: 0,
     initialOffsetY: 0,
@@ -138,12 +139,13 @@ class ReactNativeZoomableView extends Component<
           gestureState,
           this._getZoomableViewEventObject()
         ),
+      // Defaults to true to prevent parent components, such as React Navigation's tab view, from taking over as responder.
       onShouldBlockNativeResponder: (evt, gestureState) =>
-        !!this.props.onShouldBlockNativeResponder?.(
+        this.props.onShouldBlockNativeResponder?.(
           evt,
           gestureState,
           this._getZoomableViewEventObject()
-        ),
+        ) ?? true,
     });
 
     this.zoomSubjectWrapperRef = createRef<View>();
@@ -467,7 +469,8 @@ class ReactNativeZoomableView extends Component<
 
     const disableMomentum =
       this.props.disableMomentum ||
-      (this.gestureType === 'shift' &&
+      (this.props.panEnabled &&
+        this.gestureType === 'shift' &&
         this.props.disablePanOnInitialZoom &&
         this.zoomLevel === this.props.initialZoom);
 
@@ -788,10 +791,11 @@ class ReactNativeZoomableView extends Component<
    * @private
    */
   _handleShifting(gestureState: PanResponderGestureState) {
-    // Skips shifting if disablePanOnInitialZoom is set and we're on the initial zoom level
+    // Skips shifting if panEnabled is false or disablePanOnInitialZoom is true and we're on the initial zoom level
     if (
-      this.props.disablePanOnInitialZoom &&
-      this.zoomLevel === this.props.initialZoom
+      !this.props.panEnabled ||
+      (this.props.disablePanOnInitialZoom &&
+        this.zoomLevel === this.props.initialZoom)
     ) {
       return;
     }

@@ -25,6 +25,7 @@ export const StaticPin = ({
 
   return (
     <Animated.View
+      pointerEvents="none"
       style={[
         staticPinPosition && {
           left: staticPinPosition.x,

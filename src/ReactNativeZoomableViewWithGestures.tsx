@@ -61,7 +61,7 @@ class ReactNativeZoomableViewWithGestures extends React.Component<
       return false;
     }
 
-    return onSwipe && onSwipeUp && onSwipeDown && onSwipeLeft && onSwipeRight;
+    return onSwipe || onSwipeUp || onSwipeDown || onSwipeLeft || onSwipeRight;
   }
 
   /**

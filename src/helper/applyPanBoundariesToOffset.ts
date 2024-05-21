@@ -7,7 +7,8 @@
  * @param containerSize
  * @param contentSize
  * @param scale
- * @param boundaryPadding - see README
+ * @param boundaryPadding
+ * @param initialOffsetY - see README
  *
  * @returns {number}
  */
@@ -16,7 +17,8 @@ export function applyPanBoundariesToOffset(
   containerSize: number,
   contentSize: number,
   scale: number,
-  boundaryPadding: number
+  boundaryPadding: number,
+  initialOffsetY: number
 ) {
   const contentSizeUnscaled = contentSize * scale;
   const offsetUnscaled = offsetScaled * scale;
@@ -54,17 +56,20 @@ export function applyPanBoundariesToOffset(
   const contentMaxOffsetScaled =
     (paddedContainerSize / 2 - contentSizeUnscaled / 2) / scale;
 
+  // adjust the maximum and minimum offset to take into account the initialOffsetY
+  const maxOffset = Math.max(contentMaxOffsetScaled, initialOffsetY);
+  const minOffset = Math.min(-contentMaxOffsetScaled, initialOffsetY);
   if (
     // content reaching the end boundary
     contentEndBorderUnscaled < paddedContainerEndBorder
   ) {
-    return contentMaxOffsetScaled;
+    return minOffset;
   }
   if (
     // content reaching the start boundary
     contentStartBorderUnscaled > paddedContainerStartBorder
   ) {
-    return -contentMaxOffsetScaled;
+    return maxOffset;
   }
 
   return offsetScaled;

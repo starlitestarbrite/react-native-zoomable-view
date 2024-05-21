@@ -188,12 +188,17 @@ class ReactNativeZoomableView extends Component<
     const animValue = this.panAnim?.[axis];
 
     if (this.props.bindToBorders) {
-      const containerSize =
+      let containerSize =
         axis === 'x' ? this.state?.originalWidth : this.state?.originalHeight;
       const contentSize =
         axis === 'x'
           ? this.props.contentWidth || this.state?.originalWidth
           : this.props.contentHeight || this.state?.originalHeight;
+
+      // If the axis is 'y', add the initialOffsetY to the containerSize
+      if (axis === 'y' && this.props.initialOffsetY && offset <= 0) {
+        containerSize += this.props.initialOffsetY;
+      }
 
       const boundOffset =
         contentSize && containerSize
@@ -202,7 +207,8 @@ class ReactNativeZoomableView extends Component<
               containerSize,
               contentSize,
               this.zoomLevel,
-              this.props.panBoundaryPadding
+              this.props.panBoundaryPadding,
+              axis === 'y' ? this.props.initialOffsetY : 0
             )
           : offset;
 

@@ -13,16 +13,19 @@ export default function App() {
       <Text>ReactNativeZoomableView</Text>
       <View style={styles.box}>
         <ReactNativeZoomableView
-          maxZoom={30}
-          initialZoom={1.5}
           // Give these to the zoomable view so it can apply the boundaries around the actual content.
           // Need to make sure the content is actually centered and the width and height are
           // measured when it's rendered naturally. Not the intrinsic sizes.
           // For example, an image with an intrinsic size of 400x200 will be rendered as 300x150 in this case.
           // Therefore, we'll feed the zoomable view the 300x100 size.
-          contentWidth={300}
-          contentHeight={150}
-          panBoundaryPadding={50}
+          maxZoom={3}
+          minZoom={1}
+          zoomStep={1}
+          initialZoom={1}
+          pinchToZoomInSensitivity={2}
+          bindToBorders={true}
+          panBoundaryPadding={0}
+          initialOffsetY={-100}
           zoomAnimatedValue={zoomAnimatedValue}
         >
           <View style={styles.contents}>

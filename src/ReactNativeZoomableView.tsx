@@ -999,16 +999,10 @@ class ReactNativeZoomableView extends Component<
    * @return {Promise<bool>}
    */
   moveTo(newOffsetX: number, newOffsetY: number): Promise<void> {
-    if (this.zoomLevel === 1) {
-      return this._setNewOffsetPosition(newOffsetX, newOffsetY);
-    } else {
-      // const { originalWidth, originalHeight } = this.state;
+    const offsetX = newOffsetX / this.zoomLevel;
+    const offsetY = newOffsetY / this.zoomLevel;
 
-      const offsetX = newOffsetX / this.zoomLevel;
-      const offsetY = newOffsetY / this.zoomLevel;
-
-      return this._setNewOffsetPosition(offsetX, offsetY);
-    }
+    return this._setNewOffsetPosition(offsetX, offsetY);
   }
 
   /**

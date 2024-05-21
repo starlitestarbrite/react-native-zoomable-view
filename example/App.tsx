@@ -55,6 +55,7 @@ export default function App() {
       <Button
         title={`${showMarkers ? 'Hide' : 'Show'} markers`}
         onPress={() => setShowMarkers((value) => !value)}
+        // onPress={() => zoomableViewRef.current.moveTo(0,-100)}
       />
     </View>
   );
